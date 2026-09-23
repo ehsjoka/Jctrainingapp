@@ -108,30 +108,31 @@ private struct TemplateExerciseEditorRow: View {
             Text(exercise.name)
                 .font(.headline)
 
-            HStack(spacing: 12) {
-                editorField("Set", value: $exercise.defaultSets, keyboard: .numberPad)
-                editorField("Kg", value: $exercise.defaultWeight, keyboard: .decimalPad)
-                editorField("Reps", value: $exercise.defaultReps, keyboard: .numberPad)
-                editorField("Vila", value: $exercise.restSeconds, keyboard: .numberPad, suffix: "s")
+            HStack(spacing: 10) {
+                IntEditorField(label: "Set", value: $exercise.defaultSets)
+                DoubleEditorField(label: "Kg", value: $exercise.defaultWeight)
+                IntEditorField(label: "Reps", value: $exercise.defaultReps)
+                IntEditorField(label: "Vila", value: $exercise.restSeconds, suffix: "s")
             }
         }
         .padding(.vertical, 4)
     }
+}
 
-    private func editorField<T: Numeric & ParseableFormatStyle.FormatInput>(
-        _ label: String,
-        value: Binding<T>,
-        keyboard: UIKeyboardType,
-        suffix: String = ""
-    ) -> some View where T.FormatStyle: ParseableFormatStyle, T.FormatStyle.FormatInput == T {
+private struct IntEditorField: View {
+    let label: String
+    @Binding var value: Int
+    var suffix: String = ""
+
+    var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
 
             HStack(spacing: 2) {
-                TextField("0", value: value, format: .number)
-                    .keyboardType(keyboard)
+                TextField("0", value: $value, format: .number)
+                    .keyboardType(.numberPad)
                     .multilineTextAlignment(.center)
                 if !suffix.isEmpty {
                     Text(suffix)
@@ -143,6 +144,27 @@ private struct TemplateExerciseEditorRow: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 7)
             .background(.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+        }
+    }
+}
+
+private struct DoubleEditorField: View {
+    let label: String
+    @Binding var value: Double
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+            TextField("0", value: $value, format: .number.precision(.fractionLength(0...1)))
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.center)
+                .frame(minWidth: 54)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 7)
+                .background(.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
         }
     }
 }
