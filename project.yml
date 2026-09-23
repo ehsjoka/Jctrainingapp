@@ -1,0 +1,19 @@
+name: JCTraining
+options:
+  bundleIdPrefix: se.ehsjoka
+targets:
+  JCTraining:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - JCTraining
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: se.ehsjoka.JCTraining
+        SWIFT_VERSION: 5.9
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        TARGETED_DEVICE_FAMILY: "1"
