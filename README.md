@@ -13,8 +13,10 @@ Local iPhone training app built with SwiftUI + SwiftData.
 - CSV template import/export (next milestone)
 - Strength + cycling/spinning/MTB + padel history (next milestone)
 
-## Base
-Architecture and selected concepts are derived from the MIT-licensed `GunnarStrandbergAB/strength_tracker` project (HellBentIron). Apple Watch code is intentionally excluded from this app.
+## Technical direction
+The app is being built as an original SwiftUI/SwiftData implementation. We are using public product ideas and architectural patterns from strength-training apps, including the public `GunnarStrandbergAB/strength_tracker` repository, but we are not copying source code from that repository because its README currently labels the project as private.
+
+Apple Watch code is intentionally excluded from JC Training.
 
 ## Requirements
 - iOS 17+
