@@ -1,4 +1,4 @@
-const KEY="jc-training-data-test-v3";
+const KEY="jc-training-data-test-v4";
 const exerciseHelpAliases={
 "bench-press":"Barbell Bench Press","incline-db-press":"Incline Dumbbell Press","dumbbell-bench-press":"Dumbbell Bench Press","incline-bench-press":"Incline Bench Press","chest-press-machine":"Machine Bench Press","cable-fly":"Cable Crossover","pec-deck":"Butterfly","push-up":"Pushups",
 "biceps-curl":"Barbell Curl","hammer-curl":"Hammer Curls","incline-db-curl":"Incline Dumbbell Curl","preacher-curl":"Preacher Curl","cable-curl":"Cable Hammer Curls - Rope Attachment",
@@ -63,7 +63,9 @@ const defaultExercises=[
 {id:"hip-thrust",name:"Hip thrust",group:"Ben"},
 {id:"walking-lunge",name:"Gående utfall",group:"Ben"},
 {id:"bulgarian-split-squat",name:"Bulgariska utfall",group:"Ben"},
-{id:"calf-raise",name:"Vadpress",group:"Ben"}
+{id:"calf-raise",name:"Vadpress",group:"Ben"},
+{id:"dumbbell-shrug",name:"Hantelshrugs",group:"Rygg"},
+{id:"cable-triceps-extension",name:"Tricepsextension i kabel",group:"Triceps"}
 ];
 
 const seed={
@@ -73,7 +75,15 @@ templates:[
 {id:crypto.randomUUID(),name:"Axlar, mage och ben",type:"strength",exercises:[
 {exerciseId:"rdl",sets:3,weight:0,reps:8,rest:60},{exerciseId:"overhead-press",sets:3,weight:0,reps:8,rest:60},{exerciseId:"lateral-raise",sets:3,weight:0,reps:12,rest:60},{exerciseId:"reverse-fly",sets:3,weight:0,reps:12,rest:60},{exerciseId:"ab-wheel",sets:3,weight:0,reps:10,rest:60}]},
 {id:crypto.randomUUID(),name:"Rygg, triceps och lätt ben",type:"strength",exercises:[
-{exerciseId:"leg-curl",sets:3,weight:0,reps:12,rest:60},{exerciseId:"lat-pulldown",sets:3,weight:0,reps:8,rest:60},{exerciseId:"cable-row",sets:3,weight:0,reps:10,rest:60},{exerciseId:"triceps-pushdown",sets:3,weight:0,reps:10,rest:60}]},
+{exerciseId:"rdl",setValues:[{weight:50,reps:12},{weight:60,reps:10},{weight:60,reps:10}],rest:60},
+{exerciseId:"barbell-row",setValues:[{weight:50,reps:12},{weight:60,reps:8},{weight:60,reps:8}],rest:60},
+{exerciseId:"leg-curl",setValues:[{weight:15,reps:8}],rest:60},
+{exerciseId:"one-arm-db-row",setValues:[{weight:32.5,reps:12},{weight:32.5,reps:12},{weight:35,reps:10}],rest:60},
+{exerciseId:"skull-crusher",setValues:[{weight:42,reps:9},{weight:42,reps:9},{weight:42,reps:8}],rest:60},
+{exerciseId:"triceps-pushdown",setValues:[{weight:36,reps:9},{weight:36,reps:10},{weight:36,reps:10},{weight:15,reps:5}],rest:60},
+{exerciseId:"dumbbell-shrug",setValues:[{weight:40,reps:12},{weight:40,reps:12},{weight:40,reps:12}],rest:60},
+{exerciseId:"lat-pulldown",setValues:[{weight:80,reps:8},{weight:80,reps:8},{weight:90,reps:3},{weight:70,reps:5}],rest:60},
+{exerciseId:"cable-triceps-extension",setValues:[{weight:28,reps:9},{weight:28,reps:9},{weight:28,reps:8},{weight:17,reps:8}],rest:60}]},
 {id:crypto.randomUUID(),name:"Spinning med hög cardio",type:"cardio",duration:45},
 {id:crypto.randomUUID(),name:"Låg cardio",type:"cardio",duration:60},
 {id:crypto.randomUUID(),name:"Padel",type:"padel",duration:90}
@@ -94,6 +104,7 @@ let pendingTemplateUpdate=null;
 function load(){
  localStorage.removeItem("jc-training-data-v1");
  localStorage.removeItem("jc-training-data-test-v2");
+ localStorage.removeItem("jc-training-data-test-v3");
  try{return JSON.parse(localStorage.getItem(KEY))||structuredClone(seed)}
  catch{return structuredClone(seed)}
 }
@@ -218,7 +229,7 @@ function exerciseIcon(id){
   "triceps-pushdown":"pushdown","rope-pushdown":"pushdown","overhead-triceps-extension":"triceps","skull-crusher":"triceps","dips":"dip","close-grip-bench":"bench",
   "squat":"squat","front-squat":"squat","goblet-squat":"squat","leg-press":"legpress","leg-extension":"legextension","leg-curl":"legcurl",
   "rdl":"hinge","deadlift":"deadlift","hip-thrust":"hipthrust","walking-lunge":"lunge","bulgarian-split-squat":"split","calf-raise":"calf",
-  "push-up":"pushup"
+  "push-up":"pushup","dumbbell-shrug":"shrug","cable-triceps-extension":"triceps"
  }[id]||"generic";
  const paths={
   bench:'<path d="M3 17h18M5 14h14M7 14l2-5m8 5-2-5M4 8h16M6 6v4m12-4v4"/>',
@@ -250,6 +261,7 @@ function exerciseIcon(id){
   split:'<circle cx="11" cy="5" r="2"/><path d="M11 7v7m0 0-5 5m5-5 5 3m0 0 3-5M16 17h5M4 20h5"/>',
   calf:'<circle cx="12" cy="5" r="2"/><path d="M12 7v8m0 0-3 5m3-5 3 5M7 20h10M18 17v3"/>',
   pushup:'<circle cx="6" cy="11" r="2"/><path d="M8 12l8 2m0 0 4 3M10 13l-2 5m7-4 2 5M3 19h18"/>',
+  shrug:'<circle cx="12" cy="5" r="2"/><path d="M12 7v8m0-5-4 3m4-3 4 3M8 13H5m11 0h3M12 15l-3 5m3-5 3 5"/>',
   generic:'<path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/>'
  };
  return `<svg class="exercise-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths[type]}</g></svg>`;
