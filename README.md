@@ -1,31 +1,42 @@
-# JC Training
+# JC Training — PWA MVP
 
-Local iPhone training app built with SwiftUI + SwiftData.
+Installationsbar träningsapp för iPhone byggd med vanlig HTML, CSS och JavaScript.
 
-## Product direction
-- Strong-style strength logging
-- Unlimited workout templates
-- Previous-session weight/reps shown inline
-- Numeric text entry for weight and reps
-- Rest timer
-- Exercise library
-- Local-only storage
-- CSV template import/export (next milestone)
-- Strength + cycling/spinning/MTB + padel history (next milestone)
+## MVP
+- Fungerar som PWA och kan läggas på iPhones hemskärm
+- Offline via service worker
+- All data lagras lokalt på enheten
+- Obegränsat antal templates
+- Tre starttemplates för styrka
+- Spinning hög, låg cardio och padel
+- Lägg till/ta bort/redigera templates
+- Lägg till egna övningar
+- Vikt och reps skrivs direkt som siffror
+- Visar föregående vikt/reps per set
+- Vilotimer
+- Träningshistorik och månadskalender
+- Senaste 10 tillfällen per övning
+- CSV import/export av templates
+- JSON backup/restore av all lokal data
 
-## Base
-Architecture and selected concepts are derived from the MIT-licensed `GunnarStrandbergAB/strength_tracker` project (HellBentIron). Apple Watch code is intentionally excluded from this app.
+## Ingen backend
+Appen använder ingen server för användardata och kräver inget konto.
 
-## Requirements
-- iOS 17+
-- Xcode 15+
-- Swift 5.9+
+## GitHub Pages
+När PWA-branchen är mergad till main:
 
-## Development
-The project uses XcodeGen.
+1. Öppna repository Settings
+2. Välj Pages
+3. Under Build and deployment välj Deploy from a branch
+4. Välj main och /(root)
+5. Spara
+6. Öppna den publicerade GitHub Pages-adressen i Safari på iPhone
+7. Safari: Dela → Lägg till på hemskärmen
 
-```bash
-brew install xcodegen
-xcodegen generate
-open JCTraining.xcodeproj
-```
+Efter första laddningen är appens skal tillgängligt offline.
+
+## Viktigt om lokal data
+Träningsdata ligger i Safari/PWA-lagringen på just den enheten. Använd JSON-backup under Data regelbundet innan du rensar webbplatsdata eller byter telefon.
+
+## Native-version
+Den tidigare SwiftUI-prototypen finns separat i branchen `feature/mvp-ui`.
