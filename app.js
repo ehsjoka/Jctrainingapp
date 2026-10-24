@@ -2,29 +2,68 @@ const KEY="jc-training-data-v1";
 const defaultExercises=[
 {id:"bench-press",name:"Bench Press",group:"Bröst"},
 {id:"incline-db-press",name:"Incline Dumbbell Press",group:"Bröst"},
+{id:"dumbbell-bench-press",name:"Dumbbell Bench Press",group:"Bröst"},
+{id:"incline-bench-press",name:"Incline Bench Press",group:"Bröst"},
+{id:"chest-press-machine",name:"Chest Press Machine",group:"Bröst"},
+{id:"cable-fly",name:"Cable Fly",group:"Bröst"},
+{id:"pec-deck",name:"Pec Deck",group:"Bröst"},
+{id:"push-up",name:"Push-up",group:"Bröst"},
 {id:"biceps-curl",name:"Biceps Curl",group:"Biceps"},
 {id:"hammer-curl",name:"Hammer Curl",group:"Biceps"},
+{id:"incline-db-curl",name:"Incline Dumbbell Curl",group:"Biceps"},
+{id:"preacher-curl",name:"Preacher Curl",group:"Biceps"},
+{id:"cable-curl",name:"Cable Curl",group:"Biceps"},
 {id:"overhead-press",name:"Overhead Press",group:"Axlar"},
+{id:"dumbbell-shoulder-press",name:"Dumbbell Shoulder Press",group:"Axlar"},
+{id:"machine-shoulder-press",name:"Machine Shoulder Press",group:"Axlar"},
 {id:"lateral-raise",name:"Lateral Raise",group:"Axlar"},
+{id:"cable-lateral-raise",name:"Cable Lateral Raise",group:"Axlar"},
 {id:"reverse-fly",name:"Reverse Fly",group:"Axlar"},
-{id:"ab-wheel",name:"Ab Wheel",group:"Core"},
+{id:"face-pull",name:"Face Pull",group:"Axlar"},
+{id:"front-raise",name:"Front Raise",group:"Axlar"},
+{id:"ab-wheel",name:"Ab Wheel",group:"Mage/Core"},
+{id:"cable-crunch",name:"Cable Crunch",group:"Mage/Core"},
+{id:"plank",name:"Plank",group:"Mage/Core"},
+{id:"hanging-leg-raise",name:"Hanging Leg Raise",group:"Mage/Core"},
+{id:"leg-raise",name:"Leg Raise",group:"Mage/Core"},
 {id:"lat-pulldown",name:"Lat Pulldown",group:"Rygg"},
-{id:"cable-row",name:"Cable Row",group:"Rygg"},
+{id:"pull-up",name:"Pull-up",group:"Rygg"},
+{id:"chin-up",name:"Chin-up",group:"Rygg"},
+{id:"cable-row",name:"Seated Cable Row",group:"Rygg"},
+{id:"chest-supported-row",name:"Chest Supported Row",group:"Rygg"},
+{id:"barbell-row",name:"Barbell Row",group:"Rygg"},
+{id:"one-arm-db-row",name:"One-arm Dumbbell Row",group:"Rygg"},
+{id:"straight-arm-pulldown",name:"Straight-arm Pulldown",group:"Rygg"},
+{id:"back-extension",name:"Back Extension",group:"Rygg"},
 {id:"triceps-pushdown",name:"Triceps Pushdown",group:"Triceps"},
-{id:"rdl",name:"Romanian Deadlift",group:"Ben"},
+{id:"rope-pushdown",name:"Rope Pushdown",group:"Triceps"},
+{id:"overhead-triceps-extension",name:"Overhead Triceps Extension",group:"Triceps"},
+{id:"skull-crusher",name:"Skull Crusher",group:"Triceps"},
+{id:"dips",name:"Dips",group:"Triceps"},
+{id:"close-grip-bench",name:"Close-grip Bench Press",group:"Triceps"},
+{id:"squat",name:"Squat",group:"Ben"},
+{id:"front-squat",name:"Front Squat",group:"Ben"},
+{id:"goblet-squat",name:"Goblet Squat",group:"Ben"},
 {id:"leg-press",name:"Leg Press",group:"Ben"},
-{id:"leg-curl",name:"Leg Curl",group:"Ben"}
+{id:"leg-extension",name:"Leg Extension",group:"Ben"},
+{id:"leg-curl",name:"Leg Curl",group:"Ben"},
+{id:"rdl",name:"Romanian Deadlift",group:"Ben"},
+{id:"deadlift",name:"Deadlift",group:"Ben"},
+{id:"hip-thrust",name:"Hip Thrust",group:"Ben"},
+{id:"walking-lunge",name:"Walking Lunge",group:"Ben"},
+{id:"bulgarian-split-squat",name:"Bulgarian Split Squat",group:"Ben"},
+{id:"calf-raise",name:"Calf Raise",group:"Ben"}
 ];
 
 const seed={
 templates:[
-{id:crypto.randomUUID(),name:"Överkropp 1",type:"strength",exercises:[
+{id:crypto.randomUUID(),name:"Bröst, biceps och ben",type:"strength",exercises:[
 {exerciseId:"leg-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"bench-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"incline-db-press",sets:3,weight:0,reps:10,rest:90},{exerciseId:"biceps-curl",sets:3,weight:0,reps:10,rest:75},{exerciseId:"hammer-curl",sets:2,weight:0,reps:12,rest:60}]},
-{id:crypto.randomUUID(),name:"Överkropp 2",type:"strength",exercises:[
+{id:crypto.randomUUID(),name:"Axlar, mage + ben",type:"strength",exercises:[
 {exerciseId:"rdl",sets:3,weight:0,reps:8,rest:120},{exerciseId:"overhead-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"lateral-raise",sets:3,weight:0,reps:12,rest:60},{exerciseId:"reverse-fly",sets:3,weight:0,reps:12,rest:60},{exerciseId:"ab-wheel",sets:3,weight:0,reps:10,rest:60}]},
-{id:crypto.randomUUID(),name:"Överkropp 3",type:"strength",exercises:[
+{id:crypto.randomUUID(),name:"Rygg, triceps + lätt ben",type:"strength",exercises:[
 {exerciseId:"leg-curl",sets:3,weight:0,reps:12,rest:75},{exerciseId:"lat-pulldown",sets:3,weight:0,reps:8,rest:90},{exerciseId:"cable-row",sets:3,weight:0,reps:10,rest:90},{exerciseId:"triceps-pushdown",sets:3,weight:0,reps:10,rest:75}]},
-{id:crypto.randomUUID(),name:"Spinning hög",type:"cardio",duration:45},
+{id:crypto.randomUUID(),name:"Spinning med hög cardio",type:"cardio",duration:45},
 {id:crypto.randomUUID(),name:"Låg cardio",type:"cardio",duration:60},
 {id:crypto.randomUUID(),name:"Padel",type:"padel",duration:90}
 ],
@@ -39,7 +78,19 @@ let activeWorkout=null;
 let restEnds=0;
 let timerHandle=null;
 
-function load(){try{return JSON.parse(localStorage.getItem(KEY))||structuredClone(seed)}catch{return structuredClone(seed)}}
+function load(){
+ try{
+  const stored=JSON.parse(localStorage.getItem(KEY));
+  const data=stored||structuredClone(seed);
+  data.exercises=data.exercises||[];
+  const ids=new Set(data.exercises.map(e=>e.id));
+  defaultExercises.forEach(e=>{if(!ids.has(e.id))data.exercises.push(e)});
+  const rename={"Överkropp 1":"Bröst, biceps och ben","Överkropp 2":"Axlar, mage + ben","Överkropp 3":"Rygg, triceps + lätt ben","Spinning hög":"Spinning med hög cardio"};
+  (data.templates||[]).forEach(t=>{if(rename[t.name])t.name=rename[t.name]});
+  localStorage.setItem(KEY,JSON.stringify(data));
+  return data;
+ }catch{return structuredClone(seed)}
+}
 function save(){localStorage.setItem(KEY,JSON.stringify(db))}
 function el(id){return document.getElementById(id)}
 function esc(s=""){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
@@ -162,6 +213,12 @@ function dataView(){
 }
 
 function modalContent(){
+ if(modal.type==="exercise-picker"){
+  const groups=[...new Set(db.exercises.map(e=>e.group))];
+  return `<div class="modal"><div class="modal-inner"><div class="modal-head"><h2>Välj övning</h2><button class="btn ghost" data-close>Stäng</button></div>
+  <input id="picker-search" class="field" placeholder="Sök övning eller muskelgrupp" autofocus>
+  <div id="picker-list" class="picker-list">${pickerList("")}</div></div></div>`;
+ }
  if(modal.type==="template"){
   const t=db.templates.find(x=>x.id===modal.id);
   if(!t)return"";
@@ -173,6 +230,11 @@ function modalContent(){
   <button class="btn primary" data-action="save-template">Spara</button><button class="btn danger" data-action="delete-template">Ta bort template</button></div></div></div>`;
  }
  return"";
+}
+function pickerList(q){
+ const s=q.trim().toLowerCase();
+ const list=db.exercises.filter(e=>(e.name+" "+e.group).toLowerCase().includes(s));
+ return list.map(e=>`<button class="picker-item" data-pick-ex="${e.id}"><span><b>${esc(e.name)}</b><small>${esc(e.group)}</small></span><span>›</span></button>`).join("")||'<div class="card muted">Ingen övning hittades.</div>';
 }
 function templateExerciseRows(t){return (t.exercises||[]).map((x,i)=>`<div class="card" style="margin-bottom:9px">
  <div class="row between"><b>${esc(exName(x.exerciseId))}</b><button class="btn ghost" data-remove-template-ex="${i}">Ta bort</button></div>
@@ -193,6 +255,8 @@ function bind(){
  document.querySelectorAll("[data-reps]").forEach(i=>i.onchange=()=>{const[a,b]=i.dataset.reps.split(":").map(Number);activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0});
  const hs=el("history-ex");if(hs)hs.onchange=()=>renderExerciseHistory(hs.value);
  const es=el("exercise-search");if(es)es.oninput=()=>el("exercise-list").innerHTML=exerciseList(es.value);
+ const ps=el("picker-search");if(ps)ps.oninput=()=>{el("picker-list").innerHTML=pickerList(ps.value);bindPickerButtons()};
+ bindPickerButtons();
  const cf=el("csv-file");if(cf)cf.onchange=e=>importCSV(e.target.files[0]);
  const jf=el("json-file");if(jf)jf.onchange=e=>importJSON(e.target.files[0]);
  const tt=el("tpl-type");if(tt)tt.onchange=()=>{const t=db.templates.find(x=>x.id===modal.id);t.type=tt.value;if(t.type==="strength"&&!t.exercises)t.exercises=[];render()};
@@ -203,6 +267,18 @@ function bind(){
  document.querySelectorAll("[data-tpl-rest]").forEach(i=>i.onchange=()=>db.templates.find(x=>x.id===modal.id).exercises[+i.dataset.tplRest].rest=Number(i.value)||90);
  document.querySelectorAll("[data-action]").forEach(b=>b.onclick=action);
 }
+function bindPickerButtons(){
+ document.querySelectorAll("[data-pick-ex]").forEach(b=>b.onclick=()=>{
+  const ex=db.exercises.find(x=>x.id===b.dataset.pickEx);if(!ex)return;
+  if(modal.target==="workout"){
+   activeWorkout.exercises.push({exerciseId:ex.id,rest:90,sets:[{n:1,weight:0,reps:10,done:false,previous:previousSet(ex.id,0)},{n:2,weight:0,reps:10,done:false,previous:previousSet(ex.id,1)},{n:3,weight:0,reps:10,done:false,previous:previousSet(ex.id,2)}]});
+  }else if(modal.target==="template"){
+   const t=db.templates.find(x=>x.id===modal.templateId);
+   if(t)t.exercises.push({exerciseId:ex.id,sets:3,weight:0,reps:10,rest:90});
+  }
+  modal=null;render();
+ });
+}
 function action(e){
  const a=e.currentTarget.dataset.action;
  if(a==="finish")finishWorkout();
@@ -211,8 +287,8 @@ function action(e){
  if(a==="empty"){const id=crypto.randomUUID();db.templates.push({id,name:"Tomt pass",type:"strength",exercises:[]});startTemplate(id);db.templates=db.templates.filter(x=>x.id!==id)}
  if(a==="new-template"){const id=crypto.randomUUID();db.templates.push({id,name:"Ny template",type:"strength",exercises:[]});save();modal={type:"template",id};render()}
  if(a==="new-exercise"){const name=prompt("Namn på övning");if(!name)return;const group=prompt("Muskelgrupp","Övrigt")||"Övrigt";db.exercises.push({id:"custom-"+Date.now(),name,group});save();render()}
- if(a==="add-workout-exercise"){const names=db.exercises.map((x,i)=>(i+1)+". "+x.name).join("\\n");const n=Number(prompt("Välj övning:\\n"+names));if(n>=1&&n<=db.exercises.length){const ex=db.exercises[n-1];activeWorkout.exercises.push({exerciseId:ex.id,rest:90,sets:[{n:1,weight:0,reps:10,done:false,previous:previousSet(ex.id,0)},{n:2,weight:0,reps:10,done:false,previous:previousSet(ex.id,1)},{n:3,weight:0,reps:10,done:false,previous:previousSet(ex.id,2)}]});render()}}
- if(a==="add-template-ex"){const t=db.templates.find(x=>x.id===modal.id);const names=db.exercises.map((x,i)=>`${i+1}. ${x.name}`).join("\n");const n=Number(prompt("Välj nummer:\n"+names));if(n>=1&&n<=db.exercises.length){t.exercises.push({exerciseId:db.exercises[n-1].id,sets:3,weight:0,reps:10,rest:90});render()}}
+ if(a==="add-workout-exercise"){modal={type:"exercise-picker",target:"workout"};render()}
+ if(a==="add-template-ex"){modal={type:"exercise-picker",target:"template",templateId:modal.id};render()}
  if(a==="save-template"){const t=db.templates.find(x=>x.id===modal.id);t.name=el("tpl-name").value.trim()||"Template";t.type=el("tpl-type").value;if(t.type!=="strength")t.duration=Number(el("tpl-duration")?.value)||60;save();modal=null;render()}
  if(a==="delete-template"){if(confirm("Ta bort templaten?")){db.templates=db.templates.filter(x=>x.id!==modal.id);save();modal=null;render()}}
  if(a==="export-csv")exportCSV();
