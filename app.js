@@ -154,7 +154,6 @@ function lastRunText(name){
 async function app(){
  document.body.innerHTML='<div id="app"></div>';
  render();
- loadExerciseHelpCatalog().then(()=>{if(view==="train"&&!activeWorkout)render()});
  if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js");
 }
 function render(){
@@ -175,11 +174,6 @@ function viewContent(){
 }
 function header(title,sub=""){return `<div class="topbar"><div><div class="eyebrow">${esc(sub)}</div><h1>${esc(title)}</h1></div></div>`}
 
-function templateExercisePreview(t){
- if(t.type!=="strength"||!(t.exercises||[]).length)return "";
- return `<div class="template-ex-preview">${t.exercises.map(x=>`<div class="template-ex-preview-row"><span>${esc(exName(x.exerciseId))}</span>${exerciseThumb(x.exerciseId)}</div>`).join("")}</div>`;
-}
-
 function trainView(){
  if(activeWorkout)return workoutView();
  return `${header("JC Training","Starta träning")}
@@ -188,7 +182,7 @@ function trainView(){
  <div class="grid">${db.templates.map(t=>`
  <article class="card template">
    <div><span class="pill">${t.type==="strength"?(t.exercises?.length||0)+" övningar":(t.duration||0)+" min"}</span>
-   <h3 style="margin-top:9px">${esc(t.name)}</h3><div class="muted" style="font-size:13px;margin-top:4px">Senast: ${lastRunText(t.name)}</div>${templateExercisePreview(t)}</div>
+   <h3 style="margin-top:9px">${esc(t.name)}</h3><div class="muted" style="font-size:13px;margin-top:4px">Senast: ${lastRunText(t.name)}</div></div>
    <div class="row between"><button class="btn ghost" data-start="${t.id}">Starta</button><button class="btn ghost" data-edit-template="${t.id}">•••</button></div>
  </article>`).join("")}</div>`;
 }
@@ -213,12 +207,19 @@ function previousSet(exerciseId,index){
  return set?`${num(set.weight)} × ${set.reps}`:"–";
 }
 function num(n){return Number(n)%1===0?String(Number(n)):Number(n).toFixed(1)}
+function exerciseIcon(){
+ return `<svg class="exercise-icon" viewBox="0 0 24 24" aria-hidden="true">
+  <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/>
+  </g>
+ </svg>`;
+}
 function workoutView(){
  const elapsed=Math.floor((Date.now()-new Date(activeWorkout.startedAt))/1000);
  return `${header(activeWorkout.name,`Pågående`)}
  <div class="workout-elapsed"><span>⏱ Pass</span><b id="workout-elapsed">${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,"0")}</b></div>
  <div class="stack">${activeWorkout.exercises.map((e,ei)=>`
- <section class="workout-card"><div class="row between"><h3>${esc(exName(e.exerciseId))}</h3><button class="btn ghost" data-help-ex="${e.exerciseId}">ⓘ Hjälp</button></div>
+ <section class="workout-card"><div class="row between"><div class="workout-ex-title"><h3>${esc(exName(e.exerciseId))}</h3>${exerciseIcon()}</div><button class="btn ghost" data-help-ex="${e.exerciseId}">ⓘ Hjälp</button></div>
  <div class="set-grid set-head"><span>SET</span><span>FÖRRA</span><span>KG</span><span>REPS</span><span>✓</span></div>
  ${e.sets.map((s,si)=>`<div class="set-grid set-row">
  <span>${s.n}</span><span class="muted">${s.previous}</span>
