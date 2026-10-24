@@ -214,7 +214,7 @@ function trainView(){
  <article class="card template">
    <div><span class="pill">${t.type==="strength"?(t.exercises?.length||0)+" övningar":(t.duration||0)+" min"}</span>
    <h3 style="margin-top:9px">${esc(t.name)}</h3><div class="muted" style="font-size:13px;margin-top:4px">Senast: ${lastRunText(t.name)}</div></div>
-   <div class="row between"><button class="btn ghost" data-start="${t.id}">Starta</button><button class="btn ghost" data-edit-template="${t.id}">•••</button></div>
+   <div class="row between"><button class="btn primary" data-start="${t.id}">Starta</button><button class="btn ghost" data-edit-template="${t.id}">•••</button></div>
  </article>`).join("")}</div>`;
 }
 
