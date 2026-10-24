@@ -77,6 +77,7 @@ let modal=null;
 let activeWorkout=null;
 let restEnds=0;
 let timerHandle=null;
+let pendingTemplateUpdate=null;
 
 function load(){
  localStorage.removeItem("jc-training-data-v1");
@@ -150,7 +151,7 @@ function startTemplate(id){
    db.sessions.push({id:crypto.randomUUID(),name:t.name,type:t.type,startedAt:new Date().toISOString(),completedAt:new Date().toISOString(),duration});
    save();render();return;
  }
- activeWorkout={id:crypto.randomUUID(),name:t.name,type:"strength",startedAt:new Date().toISOString(),exercises:(t.exercises||[]).map(te=>({
+ activeWorkout={id:crypto.randomUUID(),templateId:t.id,name:t.name,type:"strength",startedAt:new Date().toISOString(),exercises:(t.exercises||[]).map(te=>({
  exerciseId:te.exerciseId,rest:te.rest||60,sets:templateSets(te).map((sv,i)=>({n:i+1,weight:Number(sv.weight)||0,reps:Number(sv.reps)||0,done:false,previous:previousSet(te.exerciseId,i)}))
  }))};
  render();
@@ -180,7 +181,43 @@ function workoutView(){
 }
 function restTimerHtml(){const sec=Math.max(0,Math.ceil((restEnds-Date.now())/1000));return `<div class="timer"><b>⏱ Vila</b><b id="rest-time">${Math.floor(sec/60)}:${String(sec%60).padStart(2,"0")}</b><button class="btn ghost" data-action="skip-rest">Hoppa över</button></div>`}
 function startRest(seconds){restEnds=Date.now()+seconds*1000;clearInterval(timerHandle);timerHandle=setInterval(()=>{if(restEnds<=Date.now()){clearInterval(timerHandle);restEnds=0;render()}else{const t=el("rest-time");if(t){const s=Math.ceil((restEnds-Date.now())/1000);t.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}}},1000);render()}
-function finishWorkout(){activeWorkout.completedAt=new Date().toISOString();db.sessions.push(activeWorkout);save();activeWorkout=null;restEnds=0;render()}
+function workoutDiffersFromTemplate(workout){
+ const t=db.templates.find(x=>x.id===workout.templateId);
+ if(!t||t.type!=="strength")return false;
+ if((t.exercises||[]).length!==workout.exercises.length)return true;
+ for(let i=0;i<workout.exercises.length;i++){
+  const we=workout.exercises[i],te=t.exercises[i];
+  if(!te||te.exerciseId!==we.exerciseId)return true;
+  const ts=templateSets(te);
+  if(ts.length!==we.sets.length)return true;
+  for(let j=0;j<we.sets.length;j++){
+   if(Number(ts[j].weight)!==Number(we.sets[j].weight)||Number(ts[j].reps)!==Number(we.sets[j].reps))return true;
+  }
+ }
+ return false;
+}
+function applyWorkoutToTemplate(workout){
+ const t=db.templates.find(x=>x.id===workout.templateId);
+ if(!t)return;
+ t.exercises=workout.exercises.map(e=>({
+  exerciseId:e.exerciseId,
+  rest:e.rest||60,
+  setValues:e.sets.map(s=>({weight:Number(s.weight)||0,reps:Number(s.reps)||0}))
+ }));
+}
+function finishWorkout(){
+ activeWorkout.completedAt=new Date().toISOString();
+ const finished=activeWorkout;
+ db.sessions.push(finished);
+ save();
+ activeWorkout=null;
+ restEnds=0;
+ if(workoutDiffersFromTemplate(finished)){
+  pendingTemplateUpdate=finished;
+  modal={type:"template-update"};
+ }
+ render();
+}
 
 function historyView(){
  const sessions=[...db.sessions].reverse();
@@ -221,6 +258,15 @@ function dataView(){
 }
 
 function modalContent(){
+ if(modal.type==="template-update"){
+  return `<div class="modal"><div class="modal-inner"><div class="modal-head"><h2>Uppdatera template?</h2></div>
+  <div class="card stack">
+   <p style="margin:0">Passet skiljer sig från templaten. Vill du spara ändringarna till <b>${esc(pendingTemplateUpdate?.name||"templaten")}</b>?</p>
+   <p class="hint" style="margin:0">Det kan vara ny övning, ändrat antal set eller ändrad vikt/reps.</p>
+   <button class="btn primary full" data-action="keep-template">Klar – behåll template</button>
+   <button class="btn full" data-action="update-template">Uppdatera template</button>
+  </div></div></div>`;
+ }
  if(modal.type==="exercise-picker"){
   const groups=[...new Set(db.exercises.map(e=>e.group))];
   return `<div class="modal"><div class="modal-inner"><div class="modal-head"><h2>Välj övning</h2><button class="btn ghost" data-close>Stäng</button></div>
@@ -300,6 +346,8 @@ function bindPickerButtons(){
 function action(e){
  const a=e.currentTarget.dataset.action;
  if(a==="finish")finishWorkout();
+ if(a==="keep-template"){pendingTemplateUpdate=null;modal=null;render()}
+ if(a==="update-template"){if(pendingTemplateUpdate){applyWorkoutToTemplate(pendingTemplateUpdate);save()}pendingTemplateUpdate=null;modal=null;render()}
  if(a==="cancel"){if(confirm("Avbryt passet?")){activeWorkout=null;restEnds=0;render()}}
  if(a==="skip-rest"){restEnds=0;render()}
  if(a==="empty"){const id=crypto.randomUUID();db.templates.push({id,name:"Tomt pass",type:"strength",exercises:[]});startTemplate(id);db.templates=db.templates.filter(x=>x.id!==id)}
