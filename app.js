@@ -207,19 +207,59 @@ function previousSet(exerciseId,index){
  return set?`${num(set.weight)} × ${set.reps}`:"–";
 }
 function num(n){return Number(n)%1===0?String(Number(n)):Number(n).toFixed(1)}
-function exerciseIcon(){
- return `<svg class="exercise-icon" viewBox="0 0 24 24" aria-hidden="true">
-  <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-   <path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/>
-  </g>
- </svg>`;
+function exerciseIcon(id){
+ const type={
+  "bench-press":"bench","incline-db-press":"incline","dumbbell-bench-press":"bench","incline-bench-press":"incline","chest-press-machine":"bench",
+  "biceps-curl":"curl","hammer-curl":"curl","incline-db-curl":"curl","preacher-curl":"curl","cable-curl":"curl",
+  "overhead-press":"shoulder","dumbbell-shoulder-press":"shoulder","machine-shoulder-press":"shoulder",
+  "lateral-raise":"lateral","cable-lateral-raise":"lateral","reverse-fly":"reverse","face-pull":"facepull","front-raise":"front",
+  "ab-wheel":"abwheel","cable-crunch":"crunch","plank":"plank","hanging-leg-raise":"legraise","leg-raise":"legraise",
+  "lat-pulldown":"pulldown","pull-up":"pullup","chin-up":"pullup","cable-row":"row","chest-supported-row":"row","barbell-row":"row","one-arm-db-row":"row","straight-arm-pulldown":"pulldown","back-extension":"hinge",
+  "triceps-pushdown":"pushdown","rope-pushdown":"pushdown","overhead-triceps-extension":"triceps","skull-crusher":"triceps","dips":"dip","close-grip-bench":"bench",
+  "squat":"squat","front-squat":"squat","goblet-squat":"squat","leg-press":"legpress","leg-extension":"legextension","leg-curl":"legcurl",
+  "rdl":"hinge","deadlift":"deadlift","hip-thrust":"hipthrust","walking-lunge":"lunge","bulgarian-split-squat":"split","calf-raise":"calf",
+  "push-up":"pushup"
+ }[id]||"generic";
+ const paths={
+  bench:'<path d="M3 17h18M5 14h14M7 14l2-5m8 5-2-5M4 8h16M6 6v4m12-4v4"/>',
+  incline:'<path d="M4 17h16M7 15l7-6m0 0 3 3M5 7h4m6 0h4M7 5v4m10-4v4"/>',
+  curl:'<circle cx="12" cy="5" r="2"/><path d="M12 7v6m0 0-4 6m4-6 4 6M8 10l-2 3m10-3 2 3M5 13h3m8 0h3"/>',
+  shoulder:'<circle cx="12" cy="6" r="2"/><path d="M12 8v7m0 0-4 5m4-5 4 5M7 10l-2-4m12 4 2-4M3 5h4m10 0h4"/>',
+  lateral:'<circle cx="12" cy="6" r="2"/><path d="M12 8v7m0 0-3 5m3-5 3 5M12 10H5m7 0h7M3 10h2m14 0h2"/>',
+  reverse:'<circle cx="12" cy="6" r="2"/><path d="M12 8l-2 6m2-4 6 3m-8 1-5 3m5-3 1 6m-1-6 5 4"/>',
+  front:'<circle cx="12" cy="6" r="2"/><path d="M12 8v7m0 0-3 5m3-5 3 5M11 10l-5 3m7-3 5 3"/>',
+  abwheel:'<circle cx="16" cy="17" r="3"/><circle cx="8" cy="8" r="2"/><path d="M9 10l4 4 3 3m-7-7-3 5m3-5 5 1"/>',
+  crunch:'<circle cx="9" cy="8" r="2"/><path d="M9 10l3 4 5 2M12 14l-5 3M18 4v7m0 0-3 2"/>',
+  plank:'<circle cx="6" cy="11" r="2"/><path d="M8 12l8 2m0 0 4 3M10 13l-3 4M3 18h18"/>',
+  legraise:'<circle cx="7" cy="7" r="2"/><path d="M7 9v5m0 0 5 4m-5-4-3 5m8-1 6-5"/>',
+  pulldown:'<path d="M4 4h16M6 4l3 3m9-3-3 3"/><circle cx="12" cy="9" r="2"/><path d="M12 11v6m0-5-4-3m4 3 4-3m-4 8-3 3m3-3 3 3"/>',
+  pullup:'<path d="M4 4h16"/><circle cx="12" cy="9" r="2"/><path d="M12 11v6m-4-8L6 4m10 5 2-5m-6 13-3 3m3-3 3 3"/>',
+  row:'<circle cx="8" cy="7" r="2"/><path d="M9 9l4 4m0 0 5-1M9 9l-3 6m7-2-2 6m2-6 4 5M18 12h3"/>',
+  facepull:'<circle cx="9" cy="8" r="2"/><path d="M9 10v7m0-5 5-2m0 0 4-1M14 10l3 3M9 17l-3 3m3-3 3 3"/>',
+  pushdown:'<circle cx="10" cy="6" r="2"/><path d="M10 8v7m0-4 5 2m0-8v8m-5 2-3 5m3-5 3 5M15 5h3"/>',
+  triceps:'<circle cx="12" cy="6" r="2"/><path d="M12 8v7m0-5 3-4m0 0 2 4m-5 5-3 5m3-5 3 5"/>',
+  dip:'<circle cx="12" cy="6" r="2"/><path d="M12 8v7m0-4-4 3m4-3 4 3M8 14H5m11 0h3m-7 1-3 5m3-5 3 5"/>',
+  hinge:'<circle cx="9" cy="6" r="2"/><path d="M9 8l4 5m0 0 5 2m-5-2-2 7M9 11l-4 4M5 15h14"/>',
+  deadlift:'<circle cx="12" cy="6" r="2"/><path d="M12 8l-2 6m2-6 2 6m-4 0h8m-8 0-3 5m7-5 3 5M5 14h14"/>',
+  squat:'<circle cx="12" cy="5" r="2"/><path d="M12 7v6m0 0-5 3m5-3 5 3M7 16l2 4m8-4-2 4M5 9h14"/>',
+  legpress:'<path d="M5 18h7l5-5m-9 0 4 3m0 0 4-6m-8 3-2-4m10 1 3 2M18 6l3 3"/>',
+  legextension:'<circle cx="8" cy="7" r="2"/><path d="M8 9v6m0 0h6m0 0 5-2M5 17h7"/>',
+  legcurl:'<circle cx="7" cy="10" r="2"/><path d="M9 11l6 3m0 0 4-4M4 15h9"/>',
+  hipthrust:'<circle cx="7" cy="11" r="2"/><path d="M9 12l5-2m0 0 5 4M9 12l-3 5m8-7 2 7M4 17h16"/>',
+  lunge:'<circle cx="12" cy="5" r="2"/><path d="M12 7v7m0 0-6 4m6-4 6 4M8 18h-4m12 0h4"/>',
+  split:'<circle cx="11" cy="5" r="2"/><path d="M11 7v7m0 0-5 5m5-5 5 3m0 0 3-5M16 17h5M4 20h5"/>',
+  calf:'<circle cx="12" cy="5" r="2"/><path d="M12 7v8m0 0-3 5m3-5 3 5M7 20h10M18 17v3"/>',
+  pushup:'<circle cx="6" cy="11" r="2"/><path d="M8 12l8 2m0 0 4 3M10 13l-2 5m7-4 2 5M3 19h18"/>',
+  generic:'<path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/>'
+ };
+ return `<svg class="exercise-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths[type]}</g></svg>`;
 }
 function workoutView(){
  const elapsed=Math.floor((Date.now()-new Date(activeWorkout.startedAt))/1000);
  return `${header(activeWorkout.name,`Pågående`)}
  <div class="workout-elapsed"><span>⏱ Pass</span><b id="workout-elapsed">${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,"0")}</b></div>
  <div class="stack">${activeWorkout.exercises.map((e,ei)=>`
- <section class="workout-card"><div class="row between"><div class="workout-ex-title"><h3>${esc(exName(e.exerciseId))}</h3>${exerciseIcon()}</div><button class="btn ghost" data-help-ex="${e.exerciseId}">ⓘ Hjälp</button></div>
+ <section class="workout-card"><div class="row between"><div class="workout-ex-title"><h3>${esc(exName(e.exerciseId))}</h3>${exerciseIcon(e.exerciseId)}</div><button class="btn ghost" data-help-ex="${e.exerciseId}">ⓘ Hjälp</button></div>
  <div class="set-grid set-head"><span>SET</span><span>FÖRRA</span><span>KG</span><span>REPS</span><span>✓</span></div>
  ${e.sets.map((s,si)=>`<div class="set-grid set-row">
  <span>${s.n}</span><span class="muted">${s.previous}</span>
