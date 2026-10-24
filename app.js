@@ -100,9 +100,10 @@ function lastRunText(name){
  const today=new Date();today.setHours(0,0,0,0);
  const d=new Date(s.completedAt);d.setHours(0,0,0,0);
  const days=Math.round((today-d)/86400000);
- if(days<=0)return "Idag";
- if(days===1)return "Igår";
- return days+" dagar sedan";
+ const when=days<=0?"Idag":days===1?"Igår":days+" dagar sedan";
+ let minutes=Number(s.duration)||0;
+ if(!minutes&&s.startedAt&&s.completedAt)minutes=Math.max(1,Math.round((new Date(s.completedAt)-new Date(s.startedAt))/60000));
+ return minutes?when+" ("+minutes+" min)":when;
 }
 
 function app(){
