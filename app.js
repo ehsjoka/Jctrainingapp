@@ -537,8 +537,9 @@ function action(e){
  if(a==="backup")download("jc-training-backup.json",JSON.stringify(db,null,2),"application/json");
  if(a==="reset"&&confirm("Radera all lokal träningsdata?")){db=structuredClone(seed);save();render()}
 }
-function csvEsc(v){v=String(v??"");return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function csvEsc(v,delimiter=";"){v=String(v??"");const re=delimiter===";"?/[;"\n]/:/[,"\n]/;return re.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function exportCSV(){
+ const delimiter=";";
  const rows=[["template","type","exercise","set_number","weight","reps","rest_seconds","duration_minutes"]];
  db.templates.forEach(t=>{
   if(t.type==="strength"){
@@ -547,17 +548,21 @@ function exportCSV(){
    });
   }else rows.push([t.name,t.type,"","","","","",t.duration||""]);
  });
- download("jc-training-templates.csv",rows.map(r=>r.map(csvEsc).join(",")).join("\n"),"text/csv");
+ const csv="\uFEFF"+rows.map(r=>r.map(v=>csvEsc(v,delimiter)).join(delimiter)).join("\r\n");
+ download("jc-training-templates.csv",csv,"text/csv;charset=utf-8");
 }
 function importCSV(file){
  if(!file)return;
  const r=new FileReader();
  r.onload=()=>{
-  const lines=r.result.split(/\r?\n/).filter(Boolean);
+  const text=String(r.result||"").replace(/^\uFEFF/,"");
+  const lines=text.split(/\r?\n/).filter(Boolean);
   if(lines.length<2)return;
+  const header=lines[0];
+  const delimiter=header.includes(";")?";":",";
   const templates=new Map();
   lines.slice(1).forEach(line=>{
-   const [name,type,exercise,setNumber,weight,reps,rest,duration]=parseCSVLine(line);
+   const [name,type,exercise,setNumber,weight,reps,rest,duration]=parseCSVLine(line,delimiter);
    if(!name)return;
    if(!templates.has(name))templates.set(name,{id:crypto.randomUUID(),name,type:type||"strength",exercises:[],duration:Number(duration)||0});
    const t=templates.get(name);
@@ -573,9 +578,9 @@ function importCSV(file){
   db.templates.push(...templates.values());
   save();render();
  };
- r.readAsText(file);
+ r.readAsText(file,"utf-8");
 }
-function parseCSVLine(s){let a=[],v="",q=false;for(let i=0;i<s.length;i++){const ch=s[i];if(ch==='"'&&s[i+1]==='"'&&q){v+='"';i++}else if(ch==='"')q=!q;else if(ch===","&&!q){a.push(v);v=""}else v+=ch}a.push(v);return a}
+function parseCSVLine(s,delimiter=","){let a=[],v="",q=false;for(let i=0;i<s.length;i++){const ch=s[i];if(ch==='"'&&s[i+1]==='"'&&q){v+='"';i++}else if(ch==='"')q=!q;else if(ch===delimiter&&!q){a.push(v);v=""}else v+=ch}a.push(v);return a}
 function importJSON(file){if(!file)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.templates||!x.sessions)throw 0;db=x;save();render()}catch{alert("Ogiltig backupfil")}};r.readAsText(file)}
 function download(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 
