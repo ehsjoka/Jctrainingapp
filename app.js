@@ -83,10 +83,17 @@ function load(){
   const stored=JSON.parse(localStorage.getItem(KEY));
   const data=stored||structuredClone(seed);
   data.exercises=data.exercises||[];
-  const ids=new Set(data.exercises.map(e=>e.id));
-  defaultExercises.forEach(e=>{if(!ids.has(e.id))data.exercises.push(e)});
+  const byId=new Map(data.exercises.map(e=>[e.id,e]));
+  defaultExercises.forEach(e=>{
+   const existing=byId.get(e.id);
+   if(existing){existing.name=e.name;existing.group=e.group}
+   else data.exercises.push({...e});
+  });
   const rename={"Överkropp 1":"Bröst, biceps och ben","Överkropp 2":"Axlar, mage och ben","Överkropp 3":"Rygg, triceps och lätt ben","Spinning hög":"Spinning med hög cardio"};
-  (data.templates||[]).forEach(t=>{if(rename[t.name])t.name=rename[t.name]});
+  (data.templates||[]).forEach(t=>{
+   if(rename[t.name])t.name=rename[t.name];
+   (t.exercises||[]).forEach(x=>x.rest=60);
+  });
   localStorage.setItem(KEY,JSON.stringify(data));
   return data;
  }catch{return structuredClone(seed)}
