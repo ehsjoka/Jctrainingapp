@@ -116,7 +116,7 @@ function workoutView(){
  </div>`).join("")}
  <button class="btn ghost" data-add-set="${ei}">＋ Lägg till set</button></section>`).join("")}</div>
  ${restEnds>Date.now()?restTimerHtml():""}
- <button class="btn primary full" data-action="finish">Avsluta pass</button>
+ <button class="btn full" data-action="add-workout-exercise">＋ Lägg till övning</button>\n <button class="btn primary full" data-action="finish">Avsluta pass</button>
  <button class="btn ghost full" data-action="cancel">Avbryt</button>`;
 }
 function restTimerHtml(){const sec=Math.max(0,Math.ceil((restEnds-Date.now())/1000));return `<div class="timer"><b>⏱ Vila</b><b id="rest-time">${Math.floor(sec/60)}:${String(sec%60).padStart(2,"0")}</b><button class="btn ghost" data-action="skip-rest">Hoppa över</button></div>`}
@@ -210,7 +210,7 @@ function action(e){
  if(a==="skip-rest"){restEnds=0;render()}
  if(a==="empty"){const id=crypto.randomUUID();db.templates.push({id,name:"Tomt pass",type:"strength",exercises:[]});startTemplate(id);db.templates=db.templates.filter(x=>x.id!==id)}
  if(a==="new-template"){const id=crypto.randomUUID();db.templates.push({id,name:"Ny template",type:"strength",exercises:[]});save();modal={type:"template",id};render()}
- if(a==="new-exercise"){const name=prompt("Namn på övning");if(!name)return;const group=prompt("Muskelgrupp","Övrigt")||"Övrigt";db.exercises.push({id:"custom-"+Date.now(),name,group});save();render()}
+ if(a==="new-exercise"){const name=prompt("Namn på övning");if(!name)return;const group=prompt("Muskelgrupp","Övrigt")||"Övrigt";db.exercises.push({id:"custom-"+Date.now(),name,group});save();render()}\n if(a==="add-workout-exercise"){const names=db.exercises.map((x,i)=>(i+1)+". "+x.name).join("\\n");const n=Number(prompt("Välj övning:\\n"+names));if(n>=1&&n<=db.exercises.length){const ex=db.exercises[n-1];activeWorkout.exercises.push({exerciseId:ex.id,rest:90,sets:[{n:1,weight:0,reps:10,done:false,previous:previousSet(ex.id,0)},{n:2,weight:0,reps:10,done:false,previous:previousSet(ex.id,1)},{n:3,weight:0,reps:10,done:false,previous:previousSet(ex.id,2)}]});render()}}
  if(a==="add-template-ex"){const t=db.templates.find(x=>x.id===modal.id);const names=db.exercises.map((x,i)=>`${i+1}. ${x.name}`).join("\n");const n=Number(prompt("Välj nummer:\n"+names));if(n>=1&&n<=db.exercises.length){t.exercises.push({exerciseId:db.exercises[n-1].id,sets:3,weight:0,reps:10,rest:90});render()}}
  if(a==="save-template"){const t=db.templates.find(x=>x.id===modal.id);t.name=el("tpl-name").value.trim()||"Template";t.type=el("tpl-type").value;if(t.type!=="strength")t.duration=Number(el("tpl-duration")?.value)||60;save();modal=null;render()}
  if(a==="delete-template"){if(confirm("Ta bort templaten?")){db.templates=db.templates.filter(x=>x.id!==modal.id);save();modal=null;render()}}
