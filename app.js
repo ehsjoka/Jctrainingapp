@@ -58,11 +58,11 @@ const defaultExercises=[
 const seed={
 templates:[
 {id:crypto.randomUUID(),name:"Bröst, biceps och ben",type:"strength",exercises:[
-{exerciseId:"leg-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"bench-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"incline-db-press",sets:3,weight:0,reps:10,rest:60},{exerciseId:"biceps-curl",sets:3,weight:0,reps:10,rest:75},{exerciseId:"hammer-curl",sets:2,weight:0,reps:12,rest:60}]},
+{exerciseId:"leg-press",sets:3,weight:0,reps:8,rest:60},{exerciseId:"bench-press",sets:3,weight:0,reps:8,rest:60},{exerciseId:"incline-db-press",sets:3,weight:0,reps:10,rest:60},{exerciseId:"biceps-curl",sets:3,weight:0,reps:10,rest:60},{exerciseId:"hammer-curl",sets:2,weight:0,reps:12,rest:60}]},
 {id:crypto.randomUUID(),name:"Axlar, mage och ben",type:"strength",exercises:[
-{exerciseId:"rdl",sets:3,weight:0,reps:8,rest:120},{exerciseId:"overhead-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"lateral-raise",sets:3,weight:0,reps:12,rest:60},{exerciseId:"reverse-fly",sets:3,weight:0,reps:12,rest:60},{exerciseId:"ab-wheel",sets:3,weight:0,reps:10,rest:60}]},
+{exerciseId:"rdl",sets:3,weight:0,reps:8,rest:60},{exerciseId:"overhead-press",sets:3,weight:0,reps:8,rest:60},{exerciseId:"lateral-raise",sets:3,weight:0,reps:12,rest:60},{exerciseId:"reverse-fly",sets:3,weight:0,reps:12,rest:60},{exerciseId:"ab-wheel",sets:3,weight:0,reps:10,rest:60}]},
 {id:crypto.randomUUID(),name:"Rygg, triceps och lätt ben",type:"strength",exercises:[
-{exerciseId:"leg-curl",sets:3,weight:0,reps:12,rest:75},{exerciseId:"lat-pulldown",sets:3,weight:0,reps:8,rest:60},{exerciseId:"cable-row",sets:3,weight:0,reps:10,rest:60},{exerciseId:"triceps-pushdown",sets:3,weight:0,reps:10,rest:75}]},
+{exerciseId:"leg-curl",sets:3,weight:0,reps:12,rest:60},{exerciseId:"lat-pulldown",sets:3,weight:0,reps:8,rest:60},{exerciseId:"cable-row",sets:3,weight:0,reps:10,rest:60},{exerciseId:"triceps-pushdown",sets:3,weight:0,reps:10,rest:60}]},
 {id:crypto.randomUUID(),name:"Spinning med hög cardio",type:"cardio",duration:45},
 {id:crypto.randomUUID(),name:"Låg cardio",type:"cardio",duration:60},
 {id:crypto.randomUUID(),name:"Padel",type:"padel",duration:90}
