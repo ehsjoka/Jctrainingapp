@@ -212,9 +212,13 @@ function finishWorkout(){
  save();
  activeWorkout=null;
  restEnds=0;
- if(workoutDiffersFromTemplate(finished)){
-  pendingTemplateUpdate=finished;
+ pendingTemplateUpdate=finished;
+ if(!finished.templateId){
+  modal={type:"template-save"};
+ }else if(workoutDiffersFromTemplate(finished)){
   modal={type:"template-update"};
+ }else{
+  pendingTemplateUpdate=null;
  }
  render();
 }
@@ -258,6 +262,15 @@ function dataView(){
 }
 
 function modalContent(){
+ if(modal.type==="template-save"){
+  return `<div class="modal"><div class="modal-inner"><div class="modal-head"><h2>Spara som template?</h2></div>
+  <div class="card stack">
+   <p style="margin:0">Du skapade ett nytt pass. Vill du spara det som en template?</p>
+   <input id="new-template-name" class="field" value="${esc(pendingTemplateUpdate?.name==="Nytt pass"?"":pendingTemplateUpdate?.name||"")}" placeholder="Namn på template">
+   <button class="btn primary full" data-action="discard-new-template">Klar – spara inte</button>
+   <button class="btn full" data-action="save-new-template">Spara som template</button>
+  </div></div></div>`;
+ }
  if(modal.type==="template-update"){
   return `<div class="modal"><div class="modal-inner"><div class="modal-head"><h2>Uppdatera template?</h2></div>
   <div class="card stack">
@@ -348,9 +361,20 @@ function action(e){
  if(a==="finish")finishWorkout();
  if(a==="keep-template"){pendingTemplateUpdate=null;modal=null;render()}
  if(a==="update-template"){if(pendingTemplateUpdate){applyWorkoutToTemplate(pendingTemplateUpdate);save()}pendingTemplateUpdate=null;modal=null;render()}
+ if(a==="discard-new-template"){pendingTemplateUpdate=null;modal=null;render()}
+ if(a==="save-new-template"){
+  if(pendingTemplateUpdate){
+   const name=(el("new-template-name")?.value||"").trim()||"Nytt pass";
+   const t={id:crypto.randomUUID(),name,type:"strength",exercises:pendingTemplateUpdate.exercises.map(e=>({
+    exerciseId:e.exerciseId,rest:e.rest||60,setValues:e.sets.map(s=>({weight:Number(s.weight)||0,reps:Number(s.reps)||0}))
+   }))};
+   db.templates.push(t);save();
+  }
+  pendingTemplateUpdate=null;modal=null;render();
+ }
  if(a==="cancel"){if(confirm("Avbryt passet?")){activeWorkout=null;restEnds=0;render()}}
  if(a==="skip-rest"){restEnds=0;render()}
- if(a==="empty"){const id=crypto.randomUUID();db.templates.push({id,name:"Tomt pass",type:"strength",exercises:[]});startTemplate(id);db.templates=db.templates.filter(x=>x.id!==id)}
+ if(a==="empty"){activeWorkout={id:crypto.randomUUID(),templateId:null,name:"Nytt pass",type:"strength",startedAt:new Date().toISOString(),exercises:[]};render()}
  if(a==="new-template"){const id=crypto.randomUUID();db.templates.push({id,name:"Ny template",type:"strength",exercises:[]});save();modal={type:"template",id};render()}
  if(a==="new-exercise"){const name=prompt("Namn på övning");if(!name)return;const group=prompt("Muskelgrupp","Övrigt")||"Övrigt";db.exercises.push({id:"custom-"+Date.now(),name,group});save();render()}
  if(a==="add-workout-exercise"){modal={type:"exercise-picker",target:"workout"};render()}
