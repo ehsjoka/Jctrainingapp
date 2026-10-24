@@ -121,10 +121,6 @@ let workoutTimerHandle=null;
 let pendingTemplateUpdate=null;
 
 function load(){
- localStorage.removeItem("jc-training-data-v1");
- localStorage.removeItem("jc-training-data-test-v2");
- localStorage.removeItem("jc-training-data-test-v3");
- localStorage.removeItem("jc-training-data-test-v4");
  try{return JSON.parse(localStorage.getItem(KEY))||structuredClone(seed)}
  catch{return structuredClone(seed)}
 }
@@ -163,11 +159,6 @@ async function openExerciseHelp(id){
  if(modal&&modal.type==="exercise-help"&&modal.exerciseId===id)render();
 }
 function helpImageUrl(path){return "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/"+path}
-function exerciseThumb(id){
- const item=helpMatchFor(id),p=item?.images?.[0];
- return p?`<img class="exercise-thumb" src="${helpImageUrl(p)}" alt="">`:`<span class="exercise-thumb-fallback">🏋️</span>`;
-}
-
 function fmtDate(v){return new Date(v).toLocaleDateString("sv-SE",{day:"numeric",month:"short"})}
 function typeClass(t){return t==="padel"?"type-padel":t==="cardio"?"type-cardio":"type-strength"}
 function lastRunText(name){
@@ -182,7 +173,7 @@ function lastRunText(name){
  return minutes?when+" ("+minutes+" min)":when;
 }
 
-async function app(){
+function app(){
  document.body.innerHTML='<div id="app"></div>';
  render();
  if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js");
@@ -432,7 +423,6 @@ function modalContent(){
   </div></div></div>`;
  }
  if(modal.type==="exercise-picker"){
-  const groups=[...new Set(db.exercises.map(e=>e.group))];
   return `<div class="modal"><div class="modal-inner"><div class="modal-head"><h2>Välj övning</h2><button class="btn ghost" data-close>Stäng</button></div>
   <input id="picker-search" class="field" placeholder="Sök övning eller muskelgrupp" autofocus>
   <div id="picker-list" class="picker-list">${pickerList("")}</div></div></div>`;
@@ -457,7 +447,7 @@ function pickerList(q){
 function templateExerciseRows(t){return (t.exercises||[]).map((x,i)=>{
  const sets=templateSets(x);
  return `<div class="card" style="margin-bottom:9px">
- <div class="row between"><div class="template-ex-name"><b>${esc(exName(x.exerciseId))}</b>${exerciseThumb(x.exerciseId)}</div><button class="btn ghost" data-remove-template-ex="${i}">Ta bort</button></div>
+ <div class="row between"><b>${esc(exName(x.exerciseId))}</b><button class="btn ghost" data-remove-template-ex="${i}">Ta bort</button></div>
  <div class="set-grid set-head" style="grid-template-columns:38px 1fr 1fr 42px;margin-top:10px"><span>SET</span><span>KG</span><span>REPS</span><span></span></div>
  ${sets.map((sv,si)=>`<div class="set-grid set-row" style="grid-template-columns:38px 1fr 1fr 42px">
    <span>${si+1}</span>
@@ -474,7 +464,7 @@ function templateExerciseRows(t){return (t.exercises||[]).map((x,i)=>{
 function bind(){
  document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{if(activeWorkout&&!confirm("Lämna pågående pass?"))return;activeWorkout=null;view=b.dataset.view;render()});
  document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>startTemplate(b.dataset.start));
- document.querySelectorAll("[data-edit-template]").forEach(b=>b.onclick=async()=>{modal={type:"template",id:b.dataset.editTemplate};render();await loadExerciseHelpCatalog();if(modal&&modal.type==="template"&&modal.id===b.dataset.editTemplate)render()});
+ document.querySelectorAll("[data-edit-template]").forEach(b=>b.onclick=()=>{modal={type:"template",id:b.dataset.editTemplate};render()});
  document.querySelectorAll("[data-help-ex]").forEach(b=>b.onclick=()=>openExerciseHelp(b.dataset.helpEx));
  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{modal=null;render()});
  document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{const[ei,si]=b.dataset.check.split(":").map(Number);const s=activeWorkout.exercises[ei].sets[si];s.done=!s.done;if(s.done)startRest(activeWorkout.exercises[ei].rest);else render()});
