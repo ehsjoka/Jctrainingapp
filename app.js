@@ -267,8 +267,8 @@ function modalContent(){
   <div class="card stack">
    <p style="margin:0">Du skapade ett nytt pass. Vill du spara det som en template?</p>
    <input id="new-template-name" class="field" value="${esc(pendingTemplateUpdate?.name==="Nytt pass"?"":pendingTemplateUpdate?.name||"")}" placeholder="Namn på template">
-   <button class="btn primary full" data-action="discard-new-template">Klar – spara inte</button>
-   <button class="btn full" data-action="save-new-template">Spara som template</button>
+   <button class="btn primary full" data-action="save-new-template">Spara som template</button>
+   <button class="btn full" data-action="discard-new-template">Klar – spara inte</button>
   </div></div></div>`;
  }
  if(modal.type==="template-update"){
