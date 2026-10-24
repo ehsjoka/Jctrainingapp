@@ -1,68 +1,68 @@
 const KEY="jc-training-data-v1";
 const defaultExercises=[
-{id:"bench-press",name:"Bench Press",group:"Bröst"},
-{id:"incline-db-press",name:"Incline Dumbbell Press",group:"Bröst"},
-{id:"dumbbell-bench-press",name:"Dumbbell Bench Press",group:"Bröst"},
-{id:"incline-bench-press",name:"Incline Bench Press",group:"Bröst"},
-{id:"chest-press-machine",name:"Chest Press Machine",group:"Bröst"},
-{id:"cable-fly",name:"Cable Fly",group:"Bröst"},
-{id:"pec-deck",name:"Pec Deck",group:"Bröst"},
-{id:"push-up",name:"Push-up",group:"Bröst"},
-{id:"biceps-curl",name:"Biceps Curl",group:"Biceps"},
-{id:"hammer-curl",name:"Hammer Curl",group:"Biceps"},
-{id:"incline-db-curl",name:"Incline Dumbbell Curl",group:"Biceps"},
-{id:"preacher-curl",name:"Preacher Curl",group:"Biceps"},
-{id:"cable-curl",name:"Cable Curl",group:"Biceps"},
-{id:"overhead-press",name:"Overhead Press",group:"Axlar"},
-{id:"dumbbell-shoulder-press",name:"Dumbbell Shoulder Press",group:"Axlar"},
-{id:"machine-shoulder-press",name:"Machine Shoulder Press",group:"Axlar"},
-{id:"lateral-raise",name:"Lateral Raise",group:"Axlar"},
-{id:"cable-lateral-raise",name:"Cable Lateral Raise",group:"Axlar"},
-{id:"reverse-fly",name:"Reverse Fly",group:"Axlar"},
-{id:"face-pull",name:"Face Pull",group:"Axlar"},
-{id:"front-raise",name:"Front Raise",group:"Axlar"},
-{id:"ab-wheel",name:"Ab Wheel",group:"Mage/Core"},
-{id:"cable-crunch",name:"Cable Crunch",group:"Mage/Core"},
-{id:"plank",name:"Plank",group:"Mage/Core"},
-{id:"hanging-leg-raise",name:"Hanging Leg Raise",group:"Mage/Core"},
-{id:"leg-raise",name:"Leg Raise",group:"Mage/Core"},
-{id:"lat-pulldown",name:"Lat Pulldown",group:"Rygg"},
+{id:"bench-press",name:"Bänkpress",group:"Bröst"},
+{id:"incline-db-press",name:"Lutande hantelpress",group:"Bröst"},
+{id:"dumbbell-bench-press",name:"Hantelpress",group:"Bröst"},
+{id:"incline-bench-press",name:"Lutande bänkpress",group:"Bröst"},
+{id:"chest-press-machine",name:"Bröstpress i maskin",group:"Bröst"},
+{id:"cable-fly",name:"Kabel-flyes",group:"Bröst"},
+{id:"pec-deck",name:"Pec deck",group:"Bröst"},
+{id:"push-up",name:"Armhävning",group:"Bröst"},
+{id:"biceps-curl",name:"Bicepscurl",group:"Biceps"},
+{id:"hammer-curl",name:"Hammercurl",group:"Biceps"},
+{id:"incline-db-curl",name:"Lutande hantelcurl",group:"Biceps"},
+{id:"preacher-curl",name:"Scottcurl",group:"Biceps"},
+{id:"cable-curl",name:"Kabelcurl",group:"Biceps"},
+{id:"overhead-press",name:"Axelpress",group:"Axlar"},
+{id:"dumbbell-shoulder-press",name:"Hantelpress för axlar",group:"Axlar"},
+{id:"machine-shoulder-press",name:"Axelpress i maskin",group:"Axlar"},
+{id:"lateral-raise",name:"Sidolyft",group:"Axlar"},
+{id:"cable-lateral-raise",name:"Sidolyft i kabel",group:"Axlar"},
+{id:"reverse-fly",name:"Omvända flyes",group:"Axlar"},
+{id:"face-pull",name:"Face pull",group:"Axlar"},
+{id:"front-raise",name:"Frontlyft",group:"Axlar"},
+{id:"ab-wheel",name:"Maghjul",group:"Mage/Core"},
+{id:"cable-crunch",name:"Kabelcrunch",group:"Mage/Core"},
+{id:"plank",name:"Plankan",group:"Mage/Core"},
+{id:"hanging-leg-raise",name:"Hängande benlyft",group:"Mage/Core"},
+{id:"leg-raise",name:"Benlyft",group:"Mage/Core"},
+{id:"lat-pulldown",name:"Latsdrag",group:"Rygg"},
 {id:"pull-up",name:"Pull-up",group:"Rygg"},
-{id:"chin-up",name:"Chin-up",group:"Rygg"},
-{id:"cable-row",name:"Seated Cable Row",group:"Rygg"},
-{id:"chest-supported-row",name:"Chest Supported Row",group:"Rygg"},
-{id:"barbell-row",name:"Barbell Row",group:"Rygg"},
-{id:"one-arm-db-row",name:"One-arm Dumbbell Row",group:"Rygg"},
-{id:"straight-arm-pulldown",name:"Straight-arm Pulldown",group:"Rygg"},
-{id:"back-extension",name:"Back Extension",group:"Rygg"},
-{id:"triceps-pushdown",name:"Triceps Pushdown",group:"Triceps"},
-{id:"rope-pushdown",name:"Rope Pushdown",group:"Triceps"},
-{id:"overhead-triceps-extension",name:"Overhead Triceps Extension",group:"Triceps"},
-{id:"skull-crusher",name:"Skull Crusher",group:"Triceps"},
+{id:"chin-up",name:"Chins",group:"Rygg"},
+{id:"cable-row",name:"Sittande kabelrodd",group:"Rygg"},
+{id:"chest-supported-row",name:"Bröststödd rodd",group:"Rygg"},
+{id:"barbell-row",name:"Skivstångsrodd",group:"Rygg"},
+{id:"one-arm-db-row",name:"Enarms hantelrodd",group:"Rygg"},
+{id:"straight-arm-pulldown",name:"Raka armar latsdrag",group:"Rygg"},
+{id:"back-extension",name:"Ryggresning",group:"Rygg"},
+{id:"triceps-pushdown",name:"Triceps pushdown",group:"Triceps"},
+{id:"rope-pushdown",name:"Triceps pushdown med rep",group:"Triceps"},
+{id:"overhead-triceps-extension",name:"Tricepspress över huvudet",group:"Triceps"},
+{id:"skull-crusher",name:"Liggande tricepsextension",group:"Triceps"},
 {id:"dips",name:"Dips",group:"Triceps"},
-{id:"close-grip-bench",name:"Close-grip Bench Press",group:"Triceps"},
-{id:"squat",name:"Squat",group:"Ben"},
-{id:"front-squat",name:"Front Squat",group:"Ben"},
-{id:"goblet-squat",name:"Goblet Squat",group:"Ben"},
-{id:"leg-press",name:"Leg Press",group:"Ben"},
-{id:"leg-extension",name:"Leg Extension",group:"Ben"},
-{id:"leg-curl",name:"Leg Curl",group:"Ben"},
-{id:"rdl",name:"Romanian Deadlift",group:"Ben"},
-{id:"deadlift",name:"Deadlift",group:"Ben"},
-{id:"hip-thrust",name:"Hip Thrust",group:"Ben"},
-{id:"walking-lunge",name:"Walking Lunge",group:"Ben"},
-{id:"bulgarian-split-squat",name:"Bulgarian Split Squat",group:"Ben"},
-{id:"calf-raise",name:"Calf Raise",group:"Ben"}
+{id:"close-grip-bench",name:"Smal bänkpress",group:"Triceps"},
+{id:"squat",name:"Knäböj",group:"Ben"},
+{id:"front-squat",name:"Frontböj",group:"Ben"},
+{id:"goblet-squat",name:"Goblet squat",group:"Ben"},
+{id:"leg-press",name:"Benpress",group:"Ben"},
+{id:"leg-extension",name:"Benspark",group:"Ben"},
+{id:"leg-curl",name:"Lårcurl",group:"Ben"},
+{id:"rdl",name:"Rumänska marklyft",group:"Ben"},
+{id:"deadlift",name:"Marklyft",group:"Ben"},
+{id:"hip-thrust",name:"Hip thrust",group:"Ben"},
+{id:"walking-lunge",name:"Gående utfall",group:"Ben"},
+{id:"bulgarian-split-squat",name:"Bulgariska utfall",group:"Ben"},
+{id:"calf-raise",name:"Vadpress",group:"Ben"}
 ];
 
 const seed={
 templates:[
 {id:crypto.randomUUID(),name:"Bröst, biceps och ben",type:"strength",exercises:[
-{exerciseId:"leg-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"bench-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"incline-db-press",sets:3,weight:0,reps:10,rest:90},{exerciseId:"biceps-curl",sets:3,weight:0,reps:10,rest:75},{exerciseId:"hammer-curl",sets:2,weight:0,reps:12,rest:60}]},
+{exerciseId:"leg-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"bench-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"incline-db-press",sets:3,weight:0,reps:10,rest:60},{exerciseId:"biceps-curl",sets:3,weight:0,reps:10,rest:75},{exerciseId:"hammer-curl",sets:2,weight:0,reps:12,rest:60}]},
 {id:crypto.randomUUID(),name:"Axlar, mage och ben",type:"strength",exercises:[
 {exerciseId:"rdl",sets:3,weight:0,reps:8,rest:120},{exerciseId:"overhead-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"lateral-raise",sets:3,weight:0,reps:12,rest:60},{exerciseId:"reverse-fly",sets:3,weight:0,reps:12,rest:60},{exerciseId:"ab-wheel",sets:3,weight:0,reps:10,rest:60}]},
 {id:crypto.randomUUID(),name:"Rygg, triceps och lätt ben",type:"strength",exercises:[
-{exerciseId:"leg-curl",sets:3,weight:0,reps:12,rest:75},{exerciseId:"lat-pulldown",sets:3,weight:0,reps:8,rest:90},{exerciseId:"cable-row",sets:3,weight:0,reps:10,rest:90},{exerciseId:"triceps-pushdown",sets:3,weight:0,reps:10,rest:75}]},
+{exerciseId:"leg-curl",sets:3,weight:0,reps:12,rest:75},{exerciseId:"lat-pulldown",sets:3,weight:0,reps:8,rest:60},{exerciseId:"cable-row",sets:3,weight:0,reps:10,rest:60},{exerciseId:"triceps-pushdown",sets:3,weight:0,reps:10,rest:75}]},
 {id:crypto.randomUUID(),name:"Spinning med hög cardio",type:"cardio",duration:45},
 {id:crypto.randomUUID(),name:"Låg cardio",type:"cardio",duration:60},
 {id:crypto.randomUUID(),name:"Padel",type:"padel",duration:90}
@@ -143,7 +143,7 @@ function startTemplate(id){
    save();render();return;
  }
  activeWorkout={id:crypto.randomUUID(),name:t.name,type:"strength",startedAt:new Date().toISOString(),exercises:(t.exercises||[]).map(te=>({
- exerciseId:te.exerciseId,rest:te.rest||90,sets:Array.from({length:te.sets||3},(_,i)=>({n:i+1,weight:Number(te.weight)||0,reps:Number(te.reps)||0,done:false,previous:previousSet(te.exerciseId,i)}))
+ exerciseId:te.exerciseId,rest:te.rest||60,sets:Array.from({length:te.sets||3},(_,i)=>({n:i+1,weight:Number(te.weight)||0,reps:Number(te.reps)||0,done:false,previous:previousSet(te.exerciseId,i)}))
  }))};
  render();
 }
@@ -264,17 +264,17 @@ function bind(){
  document.querySelectorAll("[data-tpl-set]").forEach(i=>i.onchange=()=>db.templates.find(x=>x.id===modal.id).exercises[+i.dataset.tplSet].sets=Number(i.value)||1);
  document.querySelectorAll("[data-tpl-weight]").forEach(i=>i.onchange=()=>db.templates.find(x=>x.id===modal.id).exercises[+i.dataset.tplWeight].weight=Number(i.value)||0);
  document.querySelectorAll("[data-tpl-reps]").forEach(i=>i.onchange=()=>db.templates.find(x=>x.id===modal.id).exercises[+i.dataset.tplReps].reps=Number(i.value)||0);
- document.querySelectorAll("[data-tpl-rest]").forEach(i=>i.onchange=()=>db.templates.find(x=>x.id===modal.id).exercises[+i.dataset.tplRest].rest=Number(i.value)||90);
+ document.querySelectorAll("[data-tpl-rest]").forEach(i=>i.onchange=()=>db.templates.find(x=>x.id===modal.id).exercises[+i.dataset.tplRest].rest=Number(i.value)||60);
  document.querySelectorAll("[data-action]").forEach(b=>b.onclick=action);
 }
 function bindPickerButtons(){
  document.querySelectorAll("[data-pick-ex]").forEach(b=>b.onclick=()=>{
   const ex=db.exercises.find(x=>x.id===b.dataset.pickEx);if(!ex)return;
   if(modal.target==="workout"){
-   activeWorkout.exercises.push({exerciseId:ex.id,rest:90,sets:[{n:1,weight:0,reps:10,done:false,previous:previousSet(ex.id,0)},{n:2,weight:0,reps:10,done:false,previous:previousSet(ex.id,1)},{n:3,weight:0,reps:10,done:false,previous:previousSet(ex.id,2)}]});
+   activeWorkout.exercises.push({exerciseId:ex.id,rest:60,sets:[{n:1,weight:0,reps:10,done:false,previous:previousSet(ex.id,0)},{n:2,weight:0,reps:10,done:false,previous:previousSet(ex.id,1)},{n:3,weight:0,reps:10,done:false,previous:previousSet(ex.id,2)}]});
   }else if(modal.target==="template"){
    const t=db.templates.find(x=>x.id===modal.templateId);
-   if(t)t.exercises.push({exerciseId:ex.id,sets:3,weight:0,reps:10,rest:90});
+   if(t)t.exercises.push({exerciseId:ex.id,sets:3,weight:0,reps:10,rest:60});
   }
   modal=null;render();
  });
@@ -303,7 +303,7 @@ function exportCSV(){
 }
 function importCSV(file){
  if(!file)return;const r=new FileReader();r.onload=()=>{const lines=r.result.split(/\r?\n/).filter(Boolean);if(lines.length<2)return;const map=new Map();
- lines.slice(1).forEach(line=>{const c=parseCSVLine(line),[name,type,exercise,sets,weight,reps,rest,duration]=c;if(!name)return;if(!map.has(name))map.set(name,{id:crypto.randomUUID(),name,type:type||"strength",exercises:[],duration:Number(duration)||0});const t=map.get(name);if(t.type==="strength"&&exercise){let ex=db.exercises.find(x=>x.name.toLowerCase()===exercise.toLowerCase());if(!ex){ex={id:"import-"+Date.now()+"-"+Math.random(),name:exercise,group:"Import"};db.exercises.push(ex)}t.exercises.push({exerciseId:ex.id,sets:Number(sets)||3,weight:Number(weight)||0,reps:Number(reps)||10,rest:Number(rest)||90})}});
+ lines.slice(1).forEach(line=>{const c=parseCSVLine(line),[name,type,exercise,sets,weight,reps,rest,duration]=c;if(!name)return;if(!map.has(name))map.set(name,{id:crypto.randomUUID(),name,type:type||"strength",exercises:[],duration:Number(duration)||0});const t=map.get(name);if(t.type==="strength"&&exercise){let ex=db.exercises.find(x=>x.name.toLowerCase()===exercise.toLowerCase());if(!ex){ex={id:"import-"+Date.now()+"-"+Math.random(),name:exercise,group:"Import"};db.exercises.push(ex)}t.exercises.push({exerciseId:ex.id,sets:Number(sets)||3,weight:Number(weight)||0,reps:Number(reps)||10,rest:Number(rest)||60})}});
  db.templates.push(...map.values());save();render();};r.readAsText(file);
 }
 function parseCSVLine(s){let a=[],v="",q=false;for(let i=0;i<s.length;i++){const ch=s[i];if(ch==='"'&&s[i+1]==='"'&&q){v+='"';i++}else if(ch==='"')q=!q;else if(ch===","&&!q){a.push(v);v=""}else v+=ch}a.push(v);return a}
