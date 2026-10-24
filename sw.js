@@ -1,4 +1,4 @@
-const CACHE = "jc-training-v1";
+const CACHE = "jc-training-v2";
 const ASSETS = ["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./icon.svg"];
 
 self.addEventListener("install", event => {
