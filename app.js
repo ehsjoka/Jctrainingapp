@@ -1,4 +1,4 @@
-const KEY="jc-training-data-test-v2";
+const KEY="jc-training-data-test-v3";
 const defaultExercises=[
 {id:"bench-press",name:"Bänkpress",group:"Bröst"},
 {id:"incline-db-press",name:"Lutande hantelpress",group:"Bröst"},
@@ -80,6 +80,7 @@ let timerHandle=null;
 
 function load(){
  localStorage.removeItem("jc-training-data-v1");
+ localStorage.removeItem("jc-training-data-test-v2");
  try{return JSON.parse(localStorage.getItem(KEY))||structuredClone(seed)}
  catch{return structuredClone(seed)}
 }
@@ -87,6 +88,10 @@ function save(){localStorage.setItem(KEY,JSON.stringify(db))}
 function el(id){return document.getElementById(id)}
 function esc(s=""){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function exName(id){return db.exercises.find(x=>x.id===id)?.name||id}
+function templateSets(x){
+ if(Array.isArray(x.setValues)&&x.setValues.length)return x.setValues;
+ return Array.from({length:Number(x.sets)||3},()=>({weight:Number(x.weight)||0,reps:Number(x.reps)||10}));
+}
 function fmtDate(v){return new Date(v).toLocaleDateString("sv-SE",{day:"numeric",month:"short"})}
 function typeClass(t){return t==="padel"?"type-padel":t==="cardio"?"type-cardio":"type-strength"}
 
@@ -135,7 +140,7 @@ function startTemplate(id){
    save();render();return;
  }
  activeWorkout={id:crypto.randomUUID(),name:t.name,type:"strength",startedAt:new Date().toISOString(),exercises:(t.exercises||[]).map(te=>({
- exerciseId:te.exerciseId,rest:te.rest||60,sets:Array.from({length:te.sets||3},(_,i)=>({n:i+1,weight:Number(te.weight)||0,reps:Number(te.reps)||0,done:false,previous:previousSet(te.exerciseId,i)}))
+ exerciseId:te.exerciseId,rest:te.rest||60,sets:templateSets(te).map((sv,i)=>({n:i+1,weight:Number(sv.weight)||0,reps:Number(sv.reps)||0,done:false,previous:previousSet(te.exerciseId,i)}))
  }))};
  render();
 }
@@ -228,13 +233,22 @@ function pickerList(q){
  const list=db.exercises.filter(e=>(e.name+" "+e.group).toLowerCase().includes(s));
  return list.map(e=>`<button class="picker-item" data-pick-ex="${e.id}"><span><b>${esc(e.name)}</b><small>${esc(e.group)}</small></span><span>›</span></button>`).join("")||'<div class="card muted">Ingen övning hittades.</div>';
 }
-function templateExerciseRows(t){return (t.exercises||[]).map((x,i)=>`<div class="card" style="margin-bottom:9px">
+function templateExerciseRows(t){return (t.exercises||[]).map((x,i)=>{
+ const sets=templateSets(x);
+ return `<div class="card" style="margin-bottom:9px">
  <div class="row between"><b>${esc(exName(x.exerciseId))}</b><button class="btn ghost" data-remove-template-ex="${i}">Ta bort</button></div>
- <div class="set-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;margin-top:9px">
- <label class="hint">Set<input class="field small" data-tpl-set="${i}" value="${x.sets}"></label>
- <label class="hint">Kg<input class="field small" data-tpl-weight="${i}" value="${x.weight}"></label>
- <label class="hint">Reps<input class="field small" data-tpl-reps="${i}" value="${x.reps}"></label>
- <label class="hint">Vila<input class="field small" data-tpl-rest="${i}" value="${x.rest}"></label></div></div>`).join("")}
+ <div class="set-grid set-head" style="grid-template-columns:38px 1fr 1fr 42px;margin-top:10px"><span>SET</span><span>KG</span><span>REPS</span><span></span></div>
+ ${sets.map((sv,si)=>`<div class="set-grid set-row" style="grid-template-columns:38px 1fr 1fr 42px">
+   <span>${si+1}</span>
+   <input class="field small" inputmode="decimal" data-tpl-set-weight="${i}:${si}" value="${sv.weight}">
+   <input class="field small" inputmode="numeric" data-tpl-set-reps="${i}:${si}" value="${sv.reps}">
+   <button class="btn ghost" data-remove-tpl-set="${i}:${si}">×</button>
+ </div>`).join("")}
+ <div class="row between" style="margin-top:8px">
+   <button class="btn ghost" data-add-tpl-set="${i}">＋ Set</button>
+   <label class="hint">Vila <input class="field small" style="width:80px" data-tpl-rest="${i}" value="${x.rest||60}"></label>
+ </div></div>`;
+}).join("")}
 
 function bind(){
  document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{if(activeWorkout&&!confirm("Lämna pågående pass?"))return;activeWorkout=null;view=b.dataset.view;render()});
@@ -253,9 +267,10 @@ function bind(){
  const jf=el("json-file");if(jf)jf.onchange=e=>importJSON(e.target.files[0]);
  const tt=el("tpl-type");if(tt)tt.onchange=()=>{const t=db.templates.find(x=>x.id===modal.id);t.type=tt.value;if(t.type==="strength"&&!t.exercises)t.exercises=[];render()};
  document.querySelectorAll("[data-remove-template-ex]").forEach(b=>b.onclick=()=>{const t=db.templates.find(x=>x.id===modal.id);t.exercises.splice(+b.dataset.removeTemplateEx,1);render()});
- document.querySelectorAll("[data-tpl-set]").forEach(i=>i.onchange=()=>db.templates.find(x=>x.id===modal.id).exercises[+i.dataset.tplSet].sets=Number(i.value)||1);
- document.querySelectorAll("[data-tpl-weight]").forEach(i=>i.onchange=()=>db.templates.find(x=>x.id===modal.id).exercises[+i.dataset.tplWeight].weight=Number(i.value)||0);
- document.querySelectorAll("[data-tpl-reps]").forEach(i=>i.onchange=()=>db.templates.find(x=>x.id===modal.id).exercises[+i.dataset.tplReps].reps=Number(i.value)||0);
+ document.querySelectorAll("[data-tpl-set-weight]").forEach(inp=>inp.onchange=()=>{const[ei,si]=inp.dataset.tplSetWeight.split(":").map(Number);const x=db.templates.find(t=>t.id===modal.id).exercises[ei];x.setValues=templateSets(x);x.setValues[si].weight=Number(inp.value)||0});
+ document.querySelectorAll("[data-tpl-set-reps]").forEach(inp=>inp.onchange=()=>{const[ei,si]=inp.dataset.tplSetReps.split(":").map(Number);const x=db.templates.find(t=>t.id===modal.id).exercises[ei];x.setValues=templateSets(x);x.setValues[si].reps=Number(inp.value)||0});
+ document.querySelectorAll("[data-add-tpl-set]").forEach(b=>b.onclick=()=>{const x=db.templates.find(t=>t.id===modal.id).exercises[+b.dataset.addTplSet];x.setValues=templateSets(x);const last=x.setValues.at(-1)||{weight:0,reps:10};x.setValues.push({...last});render()});
+ document.querySelectorAll("[data-remove-tpl-set]").forEach(b=>b.onclick=()=>{const[ei,si]=b.dataset.removeTplSet.split(":").map(Number);const x=db.templates.find(t=>t.id===modal.id).exercises[ei];x.setValues=templateSets(x);if(x.setValues.length>1)x.setValues.splice(si,1);render()});
  document.querySelectorAll("[data-tpl-rest]").forEach(i=>i.onchange=()=>db.templates.find(x=>x.id===modal.id).exercises[+i.dataset.tplRest].rest=Number(i.value)||60);
  document.querySelectorAll("[data-action]").forEach(b=>b.onclick=action);
 }
@@ -266,7 +281,7 @@ function bindPickerButtons(){
    activeWorkout.exercises.push({exerciseId:ex.id,rest:60,sets:[{n:1,weight:0,reps:10,done:false,previous:previousSet(ex.id,0)},{n:2,weight:0,reps:10,done:false,previous:previousSet(ex.id,1)},{n:3,weight:0,reps:10,done:false,previous:previousSet(ex.id,2)}]});
   }else if(modal.target==="template"){
    const t=db.templates.find(x=>x.id===modal.templateId);
-   if(t)t.exercises.push({exerciseId:ex.id,sets:3,weight:0,reps:10,rest:60});
+   if(t)t.exercises.push({exerciseId:ex.id,setValues:[{weight:0,reps:10},{weight:0,reps:10},{weight:0,reps:10}],rest:60});
   }
   modal=null;render();
  });
@@ -289,14 +304,41 @@ function action(e){
 }
 function csvEsc(v){v=String(v??"");return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function exportCSV(){
- const rows=[["template","type","exercise","set_count","weight","reps","rest_seconds","duration_minutes"]];
- db.templates.forEach(t=>{if(t.type==="strength")(t.exercises||[]).forEach(x=>rows.push([t.name,t.type,exName(x.exerciseId),x.sets,x.weight,x.reps,x.rest,""]));else rows.push([t.name,t.type,"","","","","",t.duration||""])});
+ const rows=[["template","type","exercise","set_number","weight","reps","rest_seconds","duration_minutes"]];
+ db.templates.forEach(t=>{
+  if(t.type==="strength"){
+   (t.exercises||[]).forEach(x=>{
+    templateSets(x).forEach((sv,si)=>rows.push([t.name,t.type,exName(x.exerciseId),si+1,sv.weight,sv.reps,x.rest||60,""]));
+   });
+  }else rows.push([t.name,t.type,"","","","","",t.duration||""]);
+ });
  download("jc-training-templates.csv",rows.map(r=>r.map(csvEsc).join(",")).join("\n"),"text/csv");
 }
 function importCSV(file){
- if(!file)return;const r=new FileReader();r.onload=()=>{const lines=r.result.split(/\r?\n/).filter(Boolean);if(lines.length<2)return;const map=new Map();
- lines.slice(1).forEach(line=>{const c=parseCSVLine(line),[name,type,exercise,sets,weight,reps,rest,duration]=c;if(!name)return;if(!map.has(name))map.set(name,{id:crypto.randomUUID(),name,type:type||"strength",exercises:[],duration:Number(duration)||0});const t=map.get(name);if(t.type==="strength"&&exercise){let ex=db.exercises.find(x=>x.name.toLowerCase()===exercise.toLowerCase());if(!ex){ex={id:"import-"+Date.now()+"-"+Math.random(),name:exercise,group:"Import"};db.exercises.push(ex)}t.exercises.push({exerciseId:ex.id,sets:Number(sets)||3,weight:Number(weight)||0,reps:Number(reps)||10,rest:Number(rest)||60})}});
- db.templates.push(...map.values());save();render();};r.readAsText(file);
+ if(!file)return;
+ const r=new FileReader();
+ r.onload=()=>{
+  const lines=r.result.split(/\r?\n/).filter(Boolean);
+  if(lines.length<2)return;
+  const templates=new Map();
+  lines.slice(1).forEach(line=>{
+   const [name,type,exercise,setNumber,weight,reps,rest,duration]=parseCSVLine(line);
+   if(!name)return;
+   if(!templates.has(name))templates.set(name,{id:crypto.randomUUID(),name,type:type||"strength",exercises:[],duration:Number(duration)||0});
+   const t=templates.get(name);
+   if(t.type!=="strength"||!exercise)return;
+   let ex=db.exercises.find(x=>x.name.toLowerCase()===exercise.toLowerCase());
+   if(!ex){ex={id:"import-"+Date.now()+"-"+Math.random(),name:exercise,group:"Import"};db.exercises.push(ex)}
+   let te=t.exercises.find(x=>x.exerciseId===ex.id);
+   if(!te){te={exerciseId:ex.id,setValues:[],rest:Number(rest)||60};t.exercises.push(te)}
+   const idx=Math.max(0,(Number(setNumber)||1)-1);
+   te.setValues[idx]={weight:Number(weight)||0,reps:Number(reps)||0};
+  });
+  templates.forEach(t=>(t.exercises||[]).forEach(x=>{x.setValues=(x.setValues||[]).filter(Boolean)}));
+  db.templates.push(...templates.values());
+  save();render();
+ };
+ r.readAsText(file);
 }
 function parseCSVLine(s){let a=[],v="",q=false;for(let i=0;i<s.length;i++){const ch=s[i];if(ch==='"'&&s[i+1]==='"'&&q){v+='"';i++}else if(ch==='"')q=!q;else if(ch===","&&!q){a.push(v);v=""}else v+=ch}a.push(v);return a}
 function importJSON(file){if(!file)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.templates||!x.sessions)throw 0;db=x;save();render()}catch{alert("Ogiltig backupfil")}};r.readAsText(file)}
