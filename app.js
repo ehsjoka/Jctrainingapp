@@ -88,6 +88,7 @@ let modal=null;
 let activeWorkout=null;
 let restEnds=0;
 let timerHandle=null;
+let workoutTimerHandle=null;
 let pendingTemplateUpdate=null;
 
 function load(){
@@ -112,10 +113,8 @@ function helpMatchFor(id){
  return exerciseHelpCatalog.find(x=>normalizeExerciseName(x.name)===n)
    || exerciseHelpCatalog.find(x=>normalizeExerciseName(x.name).includes(n)||n.includes(normalizeExerciseName(x.name)));
 }
-async function openExerciseHelp(id){
- modal={type:"exercise-help",exerciseId:id};render();
- if(exerciseHelpCatalog){render();return}
- if(exerciseHelpLoading)return;
+async function loadExerciseHelpCatalog(){
+ if(exerciseHelpCatalog||exerciseHelpLoading)return;
  exerciseHelpLoading=true;
  try{
   const res=await fetch("https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json");
@@ -125,10 +124,18 @@ async function openExerciseHelp(id){
   exerciseHelpCatalog=[];
  }finally{
   exerciseHelpLoading=false;
-  if(modal&&modal.type==="exercise-help"&&modal.exerciseId===id)render();
  }
 }
+async function openExerciseHelp(id){
+ modal={type:"exercise-help",exerciseId:id};render();
+ await loadExerciseHelpCatalog();
+ if(modal&&modal.type==="exercise-help"&&modal.exerciseId===id)render();
+}
 function helpImageUrl(path){return "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/"+path}
+function exerciseThumb(id){
+ const item=helpMatchFor(id),p=item?.images?.[0];
+ return p?`<img class="exercise-thumb" src="${helpImageUrl(p)}" alt="">`:`<span class="exercise-thumb-fallback">🏋️</span>`;
+}
 
 function fmtDate(v){return new Date(v).toLocaleDateString("sv-SE",{day:"numeric",month:"short"})}
 function typeClass(t){return t==="padel"?"type-padel":t==="cardio"?"type-cardio":"type-strength"}
@@ -156,6 +163,7 @@ function render(){
  ${navBtn("train","🏋️","Träna")}${navBtn("history","◫","Historik")}${navBtn("exercises","☰","Övningar")}${navBtn("data","⚙️","Data")}
  </div></nav>${modal?modalContent():""}`;
  bind();
+ if(activeWorkout)startWorkoutElapsedTimer();else clearInterval(workoutTimerHandle);
 }
 function navBtn(v,icon,label){return `<button data-view="${v}" class="${view===v?"active":""}"><span>${icon}</span>${label}</button>`}
 function viewContent(){
@@ -201,7 +209,8 @@ function previousSet(exerciseId,index){
 function num(n){return Number(n)%1===0?String(Number(n)):Number(n).toFixed(1)}
 function workoutView(){
  const elapsed=Math.floor((Date.now()-new Date(activeWorkout.startedAt))/1000);
- return `${header(activeWorkout.name,`Pågående · ${Math.floor(elapsed/60)} min`)}
+ return `${header(activeWorkout.name,`Pågående`)}
+ <div class="workout-elapsed"><span>⏱ Pass</span><b id="workout-elapsed">${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,"0")}</b></div>
  <div class="stack">${activeWorkout.exercises.map((e,ei)=>`
  <section class="workout-card"><div class="row between"><h3>${esc(exName(e.exerciseId))}</h3><button class="btn ghost" data-help-ex="${e.exerciseId}">ⓘ Hjälp</button></div>
  <div class="set-grid set-head"><span>SET</span><span>FÖRRA</span><span>KG</span><span>REPS</span><span>✓</span></div>
@@ -215,6 +224,17 @@ function workoutView(){
  ${restEnds>Date.now()?restTimerHtml():""}
  <button class="btn full" data-action="add-workout-exercise">＋ Lägg till övning</button>\n <button class="btn primary full" data-action="finish">Avsluta pass</button>
  <button class="btn ghost full" data-action="cancel">Avbryt</button>`;
+}
+function startWorkoutElapsedTimer(){
+ clearInterval(workoutTimerHandle);
+ if(!activeWorkout)return;
+ const update=()=>{
+  const out=el("workout-elapsed");if(!out||!activeWorkout)return;
+  const s=Math.max(0,Math.floor((Date.now()-new Date(activeWorkout.startedAt))/1000));
+  out.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+ };
+ update();
+ workoutTimerHandle=setInterval(update,1000);
 }
 function restTimerHtml(){const sec=Math.max(0,Math.ceil((restEnds-Date.now())/1000));return `<div class="timer"><b>⏱ Vila</b><b id="rest-time">${Math.floor(sec/60)}:${String(sec%60).padStart(2,"0")}</b><button class="btn ghost" data-action="skip-rest">Hoppa över</button></div>`}
 function startRest(seconds){restEnds=Date.now()+seconds*1000;clearInterval(timerHandle);timerHandle=setInterval(()=>{if(restEnds<=Date.now()){clearInterval(timerHandle);restEnds=0;render()}else{const t=el("rest-time");if(t){const s=Math.ceil((restEnds-Date.now())/1000);t.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}}},1000);render()}
@@ -357,7 +377,7 @@ function pickerList(q){
 function templateExerciseRows(t){return (t.exercises||[]).map((x,i)=>{
  const sets=templateSets(x);
  return `<div class="card" style="margin-bottom:9px">
- <div class="row between"><b>${esc(exName(x.exerciseId))}</b><button class="btn ghost" data-remove-template-ex="${i}">Ta bort</button></div>
+ <div class="row between"><div class="template-ex-name"><b>${esc(exName(x.exerciseId))}</b>${exerciseThumb(x.exerciseId)}</div><button class="btn ghost" data-remove-template-ex="${i}">Ta bort</button></div>
  <div class="set-grid set-head" style="grid-template-columns:38px 1fr 1fr 42px;margin-top:10px"><span>SET</span><span>KG</span><span>REPS</span><span></span></div>
  ${sets.map((sv,si)=>`<div class="set-grid set-row" style="grid-template-columns:38px 1fr 1fr 42px">
    <span>${si+1}</span>
@@ -374,7 +394,7 @@ function templateExerciseRows(t){return (t.exercises||[]).map((x,i)=>{
 function bind(){
  document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{if(activeWorkout&&!confirm("Lämna pågående pass?"))return;activeWorkout=null;view=b.dataset.view;render()});
  document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>startTemplate(b.dataset.start));
- document.querySelectorAll("[data-edit-template]").forEach(b=>b.onclick=()=>{modal={type:"template",id:b.dataset.editTemplate};render()});
+ document.querySelectorAll("[data-edit-template]").forEach(b=>b.onclick=async()=>{modal={type:"template",id:b.dataset.editTemplate};render();await loadExerciseHelpCatalog();if(modal&&modal.type==="template"&&modal.id===b.dataset.editTemplate)render()});
  document.querySelectorAll("[data-help-ex]").forEach(b=>b.onclick=()=>openExerciseHelp(b.dataset.helpEx));
  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{modal=null;render()});
  document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{const[ei,si]=b.dataset.check.split(":").map(Number);const s=activeWorkout.exercises[ei].sets[si];s.done=!s.done;if(s.done)startRest(activeWorkout.exercises[ei].rest);else render()});
