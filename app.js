@@ -94,6 +94,16 @@ function templateSets(x){
 }
 function fmtDate(v){return new Date(v).toLocaleDateString("sv-SE",{day:"numeric",month:"short"})}
 function typeClass(t){return t==="padel"?"type-padel":t==="cardio"?"type-cardio":"type-strength"}
+function lastRunText(name){
+ const s=[...db.sessions].reverse().find(x=>x.name===name&&x.completedAt);
+ if(!s)return "Aldrig";
+ const today=new Date();today.setHours(0,0,0,0);
+ const d=new Date(s.completedAt);d.setHours(0,0,0,0);
+ const days=Math.round((today-d)/86400000);
+ if(days<=0)return "Idag";
+ if(days===1)return "Igår";
+ return days+" dagar sedan";
+}
 
 function app(){
  document.body.innerHTML='<div id="app"></div>';
@@ -125,7 +135,7 @@ function trainView(){
  <div class="grid">${db.templates.map(t=>`
  <article class="card template">
    <div><span class="pill">${t.type==="strength"?(t.exercises?.length||0)+" övningar":(t.duration||0)+" min"}</span>
-   <h3 style="margin-top:9px">${esc(t.name)}</h3></div>
+   <h3 style="margin-top:9px">${esc(t.name)}</h3><div class="muted" style="font-size:13px;margin-top:4px">Senast: ${lastRunText(t.name)}</div></div>
    <div class="row between"><button class="btn ghost" data-start="${t.id}">Starta</button><button class="btn ghost" data-edit-template="${t.id}">•••</button></div>
  </article>`).join("")}</div>`;
 }
