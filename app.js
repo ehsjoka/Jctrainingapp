@@ -59,9 +59,9 @@ const seed={
 templates:[
 {id:crypto.randomUUID(),name:"Bröst, biceps och ben",type:"strength",exercises:[
 {exerciseId:"leg-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"bench-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"incline-db-press",sets:3,weight:0,reps:10,rest:90},{exerciseId:"biceps-curl",sets:3,weight:0,reps:10,rest:75},{exerciseId:"hammer-curl",sets:2,weight:0,reps:12,rest:60}]},
-{id:crypto.randomUUID(),name:"Axlar, mage + ben",type:"strength",exercises:[
+{id:crypto.randomUUID(),name:"Axlar, mage och ben",type:"strength",exercises:[
 {exerciseId:"rdl",sets:3,weight:0,reps:8,rest:120},{exerciseId:"overhead-press",sets:3,weight:0,reps:8,rest:120},{exerciseId:"lateral-raise",sets:3,weight:0,reps:12,rest:60},{exerciseId:"reverse-fly",sets:3,weight:0,reps:12,rest:60},{exerciseId:"ab-wheel",sets:3,weight:0,reps:10,rest:60}]},
-{id:crypto.randomUUID(),name:"Rygg, triceps + lätt ben",type:"strength",exercises:[
+{id:crypto.randomUUID(),name:"Rygg, triceps och lätt ben",type:"strength",exercises:[
 {exerciseId:"leg-curl",sets:3,weight:0,reps:12,rest:75},{exerciseId:"lat-pulldown",sets:3,weight:0,reps:8,rest:90},{exerciseId:"cable-row",sets:3,weight:0,reps:10,rest:90},{exerciseId:"triceps-pushdown",sets:3,weight:0,reps:10,rest:75}]},
 {id:crypto.randomUUID(),name:"Spinning med hög cardio",type:"cardio",duration:45},
 {id:crypto.randomUUID(),name:"Låg cardio",type:"cardio",duration:60},
@@ -85,7 +85,7 @@ function load(){
   data.exercises=data.exercises||[];
   const ids=new Set(data.exercises.map(e=>e.id));
   defaultExercises.forEach(e=>{if(!ids.has(e.id))data.exercises.push(e)});
-  const rename={"Överkropp 1":"Bröst, biceps och ben","Överkropp 2":"Axlar, mage + ben","Överkropp 3":"Rygg, triceps + lätt ben","Spinning hög":"Spinning med hög cardio"};
+  const rename={"Överkropp 1":"Bröst, biceps och ben","Överkropp 2":"Axlar, mage och ben","Överkropp 3":"Rygg, triceps och lätt ben","Spinning hög":"Spinning med hög cardio"};
   (data.templates||[]).forEach(t=>{if(rename[t.name])t.name=rename[t.name]});
   localStorage.setItem(KEY,JSON.stringify(data));
   return data;
