@@ -1,4 +1,5 @@
 const KEY="jc-training-data";
+const BACKUP_KEY="jc-training-data-auto-backup";
 const SCHEMA_VERSION=1;
 const exerciseHelpAliases={
 "bench-press":"Barbell Bench Press","incline-db-press":"Incline Dumbbell Press","dumbbell-bench-press":"Dumbbell Bench Press","incline-bench-press":"Incline Bench Press","chest-press-machine":"Machine Bench Press","cable-fly":"Cable Crossover","pec-deck":"Butterfly","push-up":"Pushups",
@@ -133,7 +134,25 @@ function load(){
   return stored?migrateData(stored):structuredClone(seed);
  }catch{return structuredClone(seed)}
 }
-function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function save(){
+ const current=localStorage.getItem(KEY);
+ if(current){
+  try{localStorage.setItem(BACKUP_KEY,JSON.stringify({savedAt:new Date().toISOString(),data:JSON.parse(current)}))}catch{}
+ }else{
+  localStorage.setItem(BACKUP_KEY,JSON.stringify({savedAt:new Date().toISOString(),data:db}));
+ }
+ localStorage.setItem(KEY,JSON.stringify(db));
+}
+function autoBackup(){try{return JSON.parse(localStorage.getItem(BACKUP_KEY))}catch{return null}}
+function autoBackupText(){
+ const b=autoBackup();
+ if(!b?.savedAt)return "Ingen ännu";
+ return new Date(b.savedAt).toLocaleString("sv-SE",{dateStyle:"medium",timeStyle:"short"});
+}
+function backupFileName(){
+ const d=new Date(),p=n=>String(n).padStart(2,"0");
+ return `jc-training-backup-${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}.json`;
+}
 function el(id){return document.getElementById(id)}
 function esc(s=""){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function exName(id){return db.exercises.find(x=>x.id===id)?.name||id}
@@ -392,9 +411,11 @@ function exerciseView(){
 function exerciseList(q){return db.exercises.filter(e=>(e.name+" "+e.group).toLowerCase().includes(q.toLowerCase())).map(e=>`<div class="list-item row between"><div><b>${esc(e.name)}</b><div class="muted">${esc(e.group)}</div></div><button class="btn ghost" data-help-ex="${e.id}">ⓘ</button></div>`).join("")}
 
 function dataView(){
+ const hasAutoBackup=!!autoBackup()?.data;
  return `${header("Data","Lokalt på denna enhet")}
  <div class="card stack"><button class="btn" data-action="export-csv">Exportera templates CSV</button><label class="btn" style="text-align:center">Importera templates CSV<input id="csv-file" type="file" accept=".csv,text/csv" hidden></label><button class="btn" data-action="backup">Exportera all data JSON</button><label class="btn" style="text-align:center">Återställ JSON<input id="json-file" type="file" accept=".json,application/json" hidden></label></div>
- <p class="hint">All träningsdata sparas lokalt i webbläsaren på din iPhone. Ingen server och inget konto används.</p>
+ <div class="card" style="margin-top:12px"><b>Automatisk backup</b><div class="muted" style="margin-top:5px;font-size:13px">Senaste: ${esc(autoBackupText())}</div>${hasAutoBackup?'<button class="btn" style="margin-top:10px" data-action="restore-auto-backup">Återställ automatisk backup</button>':""}</div>
+ <p class="hint">All träningsdata sparas lokalt i webbläsaren på din iPhone. Den automatiska backupen är en extra lokal återställningspunkt. För skydd vid byte eller förlust av telefon bör du även exportera JSON ibland.</p>
  <div class="danger-zone"><button class="btn danger full" data-action="reset">Radera all lokal data</button></div>`;
 }
 
@@ -533,8 +554,24 @@ function action(e){
  if(a==="save-template"){const t=db.templates.find(x=>x.id===modal.id);t.name=el("tpl-name").value.trim()||"Template";t.type=el("tpl-type").value;if(t.type!=="strength")t.duration=Number(el("tpl-duration")?.value)||60;save();modal=null;render()}
  if(a==="delete-template"){if(confirm("Ta bort templaten?")){db.templates=db.templates.filter(x=>x.id!==modal.id);save();modal=null;render()}}
  if(a==="export-csv")exportCSV();
- if(a==="backup")download("jc-training-backup.json",JSON.stringify(db,null,2),"application/json");
- if(a==="reset"&&confirm("Radera all lokal träningsdata?")){db=structuredClone(seed);save();render()}
+ if(a==="backup")download(backupFileName(),JSON.stringify(db,null,2),"application/json");
+ if(a==="restore-auto-backup"){
+  const b=autoBackup();
+  if(b?.data&&confirm("Återställa den automatiska backupen? Nuvarande data ersätts.")){
+   db=migrateData(structuredClone(b.data));
+   localStorage.setItem(KEY,JSON.stringify(db));
+   render();
+  }
+ }
+ if(a==="reset"){
+  const answer=prompt("Detta raderar all träningsdata på denna enhet. Skriv RADERA för att fortsätta.");
+  if(answer==="RADERA"){
+   db=structuredClone(seed);
+   localStorage.removeItem(BACKUP_KEY);
+   localStorage.setItem(KEY,JSON.stringify(db));
+   render();
+  }
+ }
 }
 function csvEsc(v,delimiter=";"){v=String(v??"");const re=delimiter===";"?/[;"\n]/:/[,"\n]/;return re.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function exportCSV(){
