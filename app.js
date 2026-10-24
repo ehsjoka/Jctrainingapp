@@ -1,4 +1,15 @@
 const KEY="jc-training-data-test-v3";
+const exerciseHelpAliases={
+"bench-press":"Barbell Bench Press","incline-db-press":"Incline Dumbbell Press","dumbbell-bench-press":"Dumbbell Bench Press","incline-bench-press":"Incline Bench Press","chest-press-machine":"Machine Bench Press","cable-fly":"Cable Crossover","pec-deck":"Butterfly","push-up":"Pushups",
+"biceps-curl":"Barbell Curl","hammer-curl":"Hammer Curls","incline-db-curl":"Incline Dumbbell Curl","preacher-curl":"Preacher Curl","cable-curl":"Cable Hammer Curls - Rope Attachment",
+"overhead-press":"Military Press","dumbbell-shoulder-press":"Dumbbell Shoulder Press","machine-shoulder-press":"Machine Shoulder Press","lateral-raise":"Side Lateral Raise","cable-lateral-raise":"Cable Seated Lateral Raise","reverse-fly":"Reverse Flyes","face-pull":"Face Pull","front-raise":"Front Dumbbell Raise",
+"ab-wheel":"Ab Roller","cable-crunch":"Cable Crunch","plank":"Plank","hanging-leg-raise":"Hanging Leg Raise","leg-raise":"Flat Bench Lying Leg Raise",
+"lat-pulldown":"Wide-Grip Lat Pulldown","pull-up":"Pullups","chin-up":"Chin-Up","cable-row":"Seated Cable Rows","chest-supported-row":"Chest-Supported Dumbbell Row","barbell-row":"Bent Over Barbell Row","one-arm-db-row":"One-Arm Dumbbell Row","straight-arm-pulldown":"Straight-Arm Pulldown","back-extension":"Hyperextensions (Back Extensions)",
+"triceps-pushdown":"Triceps Pushdown","rope-pushdown":"Triceps Pushdown - Rope Attachment","overhead-triceps-extension":"Standing Dumbbell Triceps Extension","skull-crusher":"Lying Triceps Press","dips":"Dips - Triceps Version","close-grip-bench":"Close-Grip Barbell Bench Press",
+"squat":"Barbell Squat","front-squat":"Front Barbell Squat","goblet-squat":"Goblet Squat","leg-press":"Leg Press","leg-extension":"Leg Extensions","leg-curl":"Lying Leg Curls","rdl":"Romanian Deadlift","deadlift":"Barbell Deadlift","hip-thrust":"Barbell Hip Thrust","walking-lunge":"Walking Lunge","bulgarian-split-squat":"Single Leg Barbell Squat","calf-raise":"Standing Calf Raises"
+};
+let exerciseHelpCatalog=null;
+let exerciseHelpLoading=false;
 const defaultExercises=[
 {id:"bench-press",name:"Bänkpress",group:"Bröst"},
 {id:"incline-db-press",name:"Lutande hantelpress",group:"Bröst"},
@@ -93,6 +104,32 @@ function templateSets(x){
  if(Array.isArray(x.setValues)&&x.setValues.length)return x.setValues;
  return Array.from({length:Number(x.sets)||3},()=>({weight:Number(x.weight)||0,reps:Number(x.reps)||10}));
 }
+function normalizeExerciseName(s){return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim()}
+function helpMatchFor(id){
+ if(!exerciseHelpCatalog)return null;
+ const alias=exerciseHelpAliases[id]||exName(id);
+ const n=normalizeExerciseName(alias);
+ return exerciseHelpCatalog.find(x=>normalizeExerciseName(x.name)===n)
+   || exerciseHelpCatalog.find(x=>normalizeExerciseName(x.name).includes(n)||n.includes(normalizeExerciseName(x.name)));
+}
+async function openExerciseHelp(id){
+ modal={type:"exercise-help",exerciseId:id};render();
+ if(exerciseHelpCatalog){render();return}
+ if(exerciseHelpLoading)return;
+ exerciseHelpLoading=true;
+ try{
+  const res=await fetch("https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json");
+  if(!res.ok)throw new Error("HTTP "+res.status);
+  exerciseHelpCatalog=await res.json();
+ }catch(e){
+  exerciseHelpCatalog=[];
+ }finally{
+  exerciseHelpLoading=false;
+  if(modal&&modal.type==="exercise-help"&&modal.exerciseId===id)render();
+ }
+}
+function helpImageUrl(path){return "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/"+path}
+
 function fmtDate(v){return new Date(v).toLocaleDateString("sv-SE",{day:"numeric",month:"short"})}
 function typeClass(t){return t==="padel"?"type-padel":t==="cardio"?"type-cardio":"type-strength"}
 function lastRunText(name){
@@ -166,7 +203,7 @@ function workoutView(){
  const elapsed=Math.floor((Date.now()-new Date(activeWorkout.startedAt))/1000);
  return `${header(activeWorkout.name,`Pågående · ${Math.floor(elapsed/60)} min`)}
  <div class="stack">${activeWorkout.exercises.map((e,ei)=>`
- <section class="workout-card"><h3>${esc(exName(e.exerciseId))}</h3>
+ <section class="workout-card"><div class="row between"><h3>${esc(exName(e.exerciseId))}</h3><button class="btn ghost" data-help-ex="${e.exerciseId}">ⓘ Hjälp</button></div>
  <div class="set-grid set-head"><span>SET</span><span>FÖRRA</span><span>KG</span><span>REPS</span><span>✓</span></div>
  ${e.sets.map((s,si)=>`<div class="set-grid set-row">
  <span>${s.n}</span><span class="muted">${s.previous}</span>
@@ -252,7 +289,7 @@ function exerciseView(){
  <div id="exercise-list" class="card list" style="margin-top:12px">${exerciseList("")}</div>
  <button class="btn full" style="margin-top:12px" data-action="new-exercise">＋ Egen övning</button>`;
 }
-function exerciseList(q){return db.exercises.filter(e=>(e.name+" "+e.group).toLowerCase().includes(q.toLowerCase())).map(e=>`<div class="list-item"><b>${esc(e.name)}</b><div class="muted">${esc(e.group)}</div></div>`).join("")}
+function exerciseList(q){return db.exercises.filter(e=>(e.name+" "+e.group).toLowerCase().includes(q.toLowerCase())).map(e=>`<div class="list-item row between"><div><b>${esc(e.name)}</b><div class="muted">${esc(e.group)}</div></div><button class="btn ghost" data-help-ex="${e.id}">ⓘ</button></div>`).join("")}
 
 function dataView(){
  return `${header("Data","Lokalt på denna enhet")}
@@ -262,6 +299,20 @@ function dataView(){
 }
 
 function modalContent(){
+ if(modal.type==="exercise-help"){
+  const id=modal.exerciseId, item=helpMatchFor(id);
+  if(exerciseHelpLoading)return `<div class="modal"><div class="modal-inner"><div class="modal-head"><h2>${esc(exName(id))}</h2><button class="btn ghost" data-close>Stäng</button></div><div class="card"><p>Hämtar övningshjälp…</p></div></div></div>`;
+  if(!item)return `<div class="modal"><div class="modal-inner"><div class="modal-head"><h2>${esc(exName(id))}</h2><button class="btn ghost" data-close>Stäng</button></div><div class="card"><p>Ingen bild/instruktion hittades för just denna övning ännu.</p></div></div></div>`;
+  return `<div class="modal"><div class="modal-inner"><div class="modal-head"><h2>${esc(exName(id))}</h2><button class="btn ghost" data-close>Stäng</button></div>
+   <div class="card stack">
+    ${(item.images||[]).slice(0,2).map(p=>`<img class="exercise-help-img" src="${helpImageUrl(p)}" alt="${esc(item.name)}">`).join("")}
+    <div><b>Målmuskel:</b> ${esc((item.primaryMuscles||[]).join(", ")||"–")}</div>
+    <div><b>Sekundära muskler:</b> ${esc((item.secondaryMuscles||[]).join(", ")||"–")}</div>
+    <div><b>Utrustning:</b> ${esc(item.equipment||"–")}</div>
+    <div><b>Instruktion:</b><ol class="help-steps">${(item.instructions||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>
+    <div class="hint">Bilder och instruktioner: free-exercise-db (public domain).</div>
+   </div></div></div>`;
+ }
  if(modal.type==="template-save"){
   return `<div class="modal"><div class="modal-inner"><div class="modal-head"><h2>Spara som template?</h2></div>
   <div class="card stack">
@@ -324,6 +375,7 @@ function bind(){
  document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{if(activeWorkout&&!confirm("Lämna pågående pass?"))return;activeWorkout=null;view=b.dataset.view;render()});
  document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>startTemplate(b.dataset.start));
  document.querySelectorAll("[data-edit-template]").forEach(b=>b.onclick=()=>{modal={type:"template",id:b.dataset.editTemplate};render()});
+ document.querySelectorAll("[data-help-ex]").forEach(b=>b.onclick=()=>openExerciseHelp(b.dataset.helpEx));
  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{modal=null;render()});
  document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{const[ei,si]=b.dataset.check.split(":").map(Number);const s=activeWorkout.exercises[ei].sets[si];s.done=!s.done;if(s.done)startRest(activeWorkout.exercises[ei].rest);else render()});
  document.querySelectorAll("[data-add-set]").forEach(b=>b.onclick=()=>{const e=activeWorkout.exercises[+b.dataset.addSet],last=e.sets.at(-1);e.sets.push({n:e.sets.length+1,weight:last?.weight||0,reps:last?.reps||0,done:false,previous:"–"});render()});
