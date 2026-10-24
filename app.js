@@ -285,7 +285,7 @@ function exerciseIcon(id){
   sidebend:'<circle cx="12" cy="5" r="2"/><path d="M12 7v7m0-5-3 4m3-4 4 3M9 13l-2 6m5-5 3 5M5 12h3"/>',
   generic:'<path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/>'
  };
- return `<svg class="exercise-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths[type]}</g></svg>`;
+ return `<svg class="exercise-icon" viewBox="0 0 24 24" preserveAspectRatio="none" aria-hidden="true" style="width:26px;height:16px"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths[type]}</g></svg>`;
 }
 function workoutView(){
  const elapsed=Math.floor((Date.now()-new Date(activeWorkout.startedAt))/1000);
