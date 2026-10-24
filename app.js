@@ -151,9 +151,10 @@ function lastRunText(name){
  return minutes?when+" ("+minutes+" min)":when;
 }
 
-function app(){
+async function app(){
  document.body.innerHTML='<div id="app"></div>';
  render();
+ loadExerciseHelpCatalog().then(()=>{if(view==="train"&&!activeWorkout)render()});
  if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js");
 }
 function render(){
@@ -174,6 +175,11 @@ function viewContent(){
 }
 function header(title,sub=""){return `<div class="topbar"><div><div class="eyebrow">${esc(sub)}</div><h1>${esc(title)}</h1></div></div>`}
 
+function templateExercisePreview(t){
+ if(t.type!=="strength"||!(t.exercises||[]).length)return "";
+ return `<div class="template-ex-preview">${t.exercises.map(x=>`<div class="template-ex-preview-row"><span>${esc(exName(x.exerciseId))}</span>${exerciseThumb(x.exerciseId)}</div>`).join("")}</div>`;
+}
+
 function trainView(){
  if(activeWorkout)return workoutView();
  return `${header("JC Training","Starta träning")}
@@ -182,7 +188,7 @@ function trainView(){
  <div class="grid">${db.templates.map(t=>`
  <article class="card template">
    <div><span class="pill">${t.type==="strength"?(t.exercises?.length||0)+" övningar":(t.duration||0)+" min"}</span>
-   <h3 style="margin-top:9px">${esc(t.name)}</h3><div class="muted" style="font-size:13px;margin-top:4px">Senast: ${lastRunText(t.name)}</div></div>
+   <h3 style="margin-top:9px">${esc(t.name)}</h3><div class="muted" style="font-size:13px;margin-top:4px">Senast: ${lastRunText(t.name)}</div>${templateExercisePreview(t)}</div>
    <div class="row between"><button class="btn ghost" data-start="${t.id}">Starta</button><button class="btn ghost" data-edit-template="${t.id}">•••</button></div>
  </article>`).join("")}</div>`;
 }
