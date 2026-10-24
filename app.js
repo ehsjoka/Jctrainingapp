@@ -1,4 +1,4 @@
-const KEY="jc-training-data-test-v4";
+const KEY="jc-training-data-test-v5";
 const exerciseHelpAliases={
 "bench-press":"Barbell Bench Press","incline-db-press":"Incline Dumbbell Press","dumbbell-bench-press":"Dumbbell Bench Press","incline-bench-press":"Incline Bench Press","chest-press-machine":"Machine Bench Press","cable-fly":"Cable Crossover","pec-deck":"Butterfly","push-up":"Pushups",
 "biceps-curl":"Barbell Curl","hammer-curl":"Hammer Curls","incline-db-curl":"Incline Dumbbell Curl","preacher-curl":"Preacher Curl","cable-curl":"Cable Hammer Curls - Rope Attachment",
@@ -6,7 +6,7 @@ const exerciseHelpAliases={
 "ab-wheel":"Ab Roller","cable-crunch":"Cable Crunch","plank":"Plank","hanging-leg-raise":"Hanging Leg Raise","leg-raise":"Flat Bench Lying Leg Raise",
 "lat-pulldown":"Wide-Grip Lat Pulldown","pull-up":"Pullups","chin-up":"Chin-Up","cable-row":"Seated Cable Rows","chest-supported-row":"Chest-Supported Dumbbell Row","barbell-row":"Bent Over Barbell Row","one-arm-db-row":"One-Arm Dumbbell Row","straight-arm-pulldown":"Straight-Arm Pulldown","back-extension":"Hyperextensions (Back Extensions)",
 "triceps-pushdown":"Triceps Pushdown","rope-pushdown":"Triceps Pushdown - Rope Attachment","overhead-triceps-extension":"Standing Dumbbell Triceps Extension","skull-crusher":"Lying Triceps Press","dips":"Dips - Triceps Version","close-grip-bench":"Close-Grip Barbell Bench Press",
-"squat":"Barbell Squat","front-squat":"Front Barbell Squat","goblet-squat":"Goblet Squat","leg-press":"Leg Press","leg-extension":"Leg Extensions","leg-curl":"Lying Leg Curls","rdl":"Romanian Deadlift","deadlift":"Barbell Deadlift","hip-thrust":"Barbell Hip Thrust","walking-lunge":"Walking Lunge","bulgarian-split-squat":"Single Leg Barbell Squat","calf-raise":"Standing Calf Raises"
+"squat":"Barbell Squat","front-squat":"Front Barbell Squat","goblet-squat":"Goblet Squat","leg-press":"Leg Press","leg-extension":"Leg Extensions","leg-curl":"Lying Leg Curls","rdl":"Romanian Deadlift","deadlift":"Barbell Deadlift","hip-thrust":"Barbell Hip Thrust","walking-lunge":"Walking Lunge","bulgarian-split-squat":"Single Leg Barbell Squat","calf-raise":"Standing Calf Raises","dumbbell-biceps-curl":"Dumbbell Bicep Curl","calf-press-leg-press":"Calf Press On The Leg Press Machine","dumbbell-side-bend":"Dumbbell Side Bend"
 };
 let exerciseHelpCatalog=null;
 let exerciseHelpLoading=false;
@@ -65,15 +65,34 @@ const defaultExercises=[
 {id:"bulgarian-split-squat",name:"Bulgariska utfall",group:"Ben"},
 {id:"calf-raise",name:"Vadpress",group:"Ben"},
 {id:"dumbbell-shrug",name:"Hantelshrugs",group:"Rygg"},
-{id:"cable-triceps-extension",name:"Tricepsextension i kabel",group:"Triceps"}
+{id:"cable-triceps-extension",name:"Tricepsextension i kabel",group:"Triceps"},
+{id:"dumbbell-biceps-curl",name:"Hantelcurl",group:"Biceps"},
+{id:"calf-press-leg-press",name:"Vadpress i benpress",group:"Ben"},
+{id:"dumbbell-side-bend",name:"Sidoböj med hantel",group:"Mage"}
 ];
 
 const seed={
 templates:[
 {id:crypto.randomUUID(),name:"Bröst, biceps och ben",type:"strength",exercises:[
-{exerciseId:"leg-press",sets:3,weight:0,reps:8,rest:60},{exerciseId:"bench-press",sets:3,weight:0,reps:8,rest:60},{exerciseId:"incline-db-press",sets:3,weight:0,reps:10,rest:60},{exerciseId:"biceps-curl",sets:3,weight:0,reps:10,rest:60},{exerciseId:"hammer-curl",sets:2,weight:0,reps:12,rest:60}]},
+{exerciseId:"bench-press",setValues:[{weight:40,reps:10},{weight:65,reps:10},{weight:70,reps:6},{weight:75,reps:4},{weight:60,reps:5}],rest:60},
+{exerciseId:"dumbbell-side-bend",setValues:[{weight:37,reps:12},{weight:37,reps:12},{weight:37,reps:12}],rest:60},
+{exerciseId:"biceps-curl",setValues:[{weight:42,reps:10},{weight:42,reps:8},{weight:42,reps:8}],rest:60},
+{exerciseId:"leg-press",setValues:[{weight:100,reps:12},{weight:130,reps:12},{weight:130,reps:12}],rest:60},
+{exerciseId:"calf-press-leg-press",setValues:[{weight:100,reps:10},{weight:130,reps:10},{weight:130,reps:10}],rest:60},
+{exerciseId:"preacher-curl",setValues:[{weight:24.5,reps:14},{weight:27,reps:12},{weight:30,reps:10}],rest:60},
+{exerciseId:"incline-db-press",setValues:[{weight:27.5,reps:8},{weight:27.5,reps:8},{weight:27.5,reps:6}],rest:60},
+{exerciseId:"leg-curl",setValues:[{weight:23,reps:10},{weight:23,reps:10},{weight:23,reps:8}],rest:60},
+{exerciseId:"dumbbell-biceps-curl",setValues:[{weight:15,reps:10},{weight:15,reps:10},{weight:15,reps:8},{weight:12.5,reps:5}],rest:60}]},
 {id:crypto.randomUUID(),name:"Axlar, mage och ben",type:"strength",exercises:[
-{exerciseId:"rdl",sets:3,weight:0,reps:8,rest:60},{exerciseId:"overhead-press",sets:3,weight:0,reps:8,rest:60},{exerciseId:"lateral-raise",sets:3,weight:0,reps:12,rest:60},{exerciseId:"reverse-fly",sets:3,weight:0,reps:12,rest:60},{exerciseId:"ab-wheel",sets:3,weight:0,reps:10,rest:60}]},
+{exerciseId:"overhead-press",setValues:[{weight:40,reps:8},{weight:42.5,reps:6},{weight:45,reps:4},{weight:40,reps:3}],rest:60},
+{exerciseId:"hanging-leg-raise",setValues:[{weight:0,reps:11},{weight:0,reps:12},{weight:0,reps:11}],rest:60},
+{exerciseId:"reverse-fly",setValues:[{weight:10,reps:12},{weight:10,reps:12},{weight:10,reps:12}],rest:60},
+{exerciseId:"ab-wheel",setValues:[{weight:0,reps:15},{weight:0,reps:15},{weight:0,reps:14}],rest:60},
+{exerciseId:"dumbbell-side-bend",setValues:[{weight:37.5,reps:12},{weight:37.5,reps:12},{weight:37.5,reps:12}],rest:60},
+{exerciseId:"lateral-raise",setValues:[{weight:10,reps:12},{weight:10,reps:13},{weight:10,reps:12}],rest:60},
+{exerciseId:"face-pull",setValues:[{weight:28,reps:12},{weight:28,reps:12},{weight:28,reps:12}],rest:60},
+{exerciseId:"cable-crunch",setValues:[{weight:60,reps:11},{weight:68,reps:10},{weight:68,reps:10}],rest:60},
+{exerciseId:"leg-extension",setValues:[{weight:45,reps:8},{weight:45,reps:9},{weight:45,reps:9}],rest:60}]},
 {id:crypto.randomUUID(),name:"Rygg, triceps och lätt ben",type:"strength",exercises:[
 {exerciseId:"rdl",setValues:[{weight:50,reps:12},{weight:60,reps:10},{weight:60,reps:10}],rest:60},
 {exerciseId:"barbell-row",setValues:[{weight:50,reps:12},{weight:60,reps:8},{weight:60,reps:8}],rest:60},
@@ -105,6 +124,7 @@ function load(){
  localStorage.removeItem("jc-training-data-v1");
  localStorage.removeItem("jc-training-data-test-v2");
  localStorage.removeItem("jc-training-data-test-v3");
+ localStorage.removeItem("jc-training-data-test-v4");
  try{return JSON.parse(localStorage.getItem(KEY))||structuredClone(seed)}
  catch{return structuredClone(seed)}
 }
@@ -229,7 +249,7 @@ function exerciseIcon(id){
   "triceps-pushdown":"pushdown","rope-pushdown":"pushdown","overhead-triceps-extension":"triceps","skull-crusher":"triceps","dips":"dip","close-grip-bench":"bench",
   "squat":"squat","front-squat":"squat","goblet-squat":"squat","leg-press":"legpress","leg-extension":"legextension","leg-curl":"legcurl",
   "rdl":"hinge","deadlift":"deadlift","hip-thrust":"hipthrust","walking-lunge":"lunge","bulgarian-split-squat":"split","calf-raise":"calf",
-  "push-up":"pushup","dumbbell-shrug":"shrug","cable-triceps-extension":"triceps"
+  "push-up":"pushup","dumbbell-shrug":"shrug","cable-triceps-extension":"triceps","dumbbell-biceps-curl":"curl","calf-press-leg-press":"calf","dumbbell-side-bend":"sidebend"
  }[id]||"generic";
  const paths={
   bench:'<path d="M3 17h18M5 14h14M7 14l2-5m8 5-2-5M4 8h16M6 6v4m12-4v4"/>',
@@ -262,6 +282,7 @@ function exerciseIcon(id){
   calf:'<circle cx="12" cy="5" r="2"/><path d="M12 7v8m0 0-3 5m3-5 3 5M7 20h10M18 17v3"/>',
   pushup:'<circle cx="6" cy="11" r="2"/><path d="M8 12l8 2m0 0 4 3M10 13l-2 5m7-4 2 5M3 19h18"/>',
   shrug:'<circle cx="12" cy="5" r="2"/><path d="M12 7v8m0-5-4 3m4-3 4 3M8 13H5m11 0h3M12 15l-3 5m3-5 3 5"/>',
+  sidebend:'<circle cx="12" cy="5" r="2"/><path d="M12 7v7m0-5-3 4m3-4 4 3M9 13l-2 6m5-5 3 5M5 12h3"/>',
   generic:'<path d="M3 9v6M6 7v10M18 7v10M21 9v6M6 12h12"/>'
  };
  return `<svg class="exercise-icon" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths[type]}</g></svg>`;
