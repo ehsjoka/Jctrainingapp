@@ -10,4 +10,4 @@
 
 .workout-ex-title{display:flex;align-items:center;gap:6px;min-width:0}
 .workout-ex-title h3{margin:0}
-.exercise-icon{width:26px;height:20px;flex:0 0 auto;color:currentColor}
+.exercise-icon{width:26px;height:16px;flex:0 0 auto;color:currentColor}
