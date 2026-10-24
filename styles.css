@@ -8,6 +8,6 @@
 .template-ex-preview-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
 .template-ex-preview-row .exercise-thumb,.template-ex-preview-row .exercise-thumb-fallback{width:34px;height:34px;border-radius:7px}
 
-.workout-ex-title{display:flex;align-items:center;gap:8px;min-width:0}
+.workout-ex-title{display:flex;align-items:center;gap:6px;min-width:0}
 .workout-ex-title h3{margin:0}
-.exercise-icon{width:26px;height:26px;flex:0 0 auto;color:currentColor}
+.exercise-icon{width:20px;height:20px;flex:0 0 auto;color:currentColor}
