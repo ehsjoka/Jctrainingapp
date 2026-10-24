@@ -1,4 +1,5 @@
-const KEY="jc-training-data-test-v5";
+const KEY="jc-training-data";
+const SCHEMA_VERSION=1;
 const exerciseHelpAliases={
 "bench-press":"Barbell Bench Press","incline-db-press":"Incline Dumbbell Press","dumbbell-bench-press":"Dumbbell Bench Press","incline-bench-press":"Incline Bench Press","chest-press-machine":"Machine Bench Press","cable-fly":"Cable Crossover","pec-deck":"Butterfly","push-up":"Pushups",
 "biceps-curl":"Barbell Curl","hammer-curl":"Hammer Curls","incline-db-curl":"Incline Dumbbell Curl","preacher-curl":"Preacher Curl","cable-curl":"Cable Hammer Curls - Rope Attachment",
@@ -72,6 +73,7 @@ const defaultExercises=[
 ];
 
 const seed={
+schemaVersion:SCHEMA_VERSION,
 templates:[
 {id:crypto.randomUUID(),name:"Bröst, biceps och ben",type:"strength",exercises:[
 {exerciseId:"bench-press",setValues:[{weight:40,reps:10},{weight:65,reps:10},{weight:70,reps:6},{weight:75,reps:4},{weight:60,reps:5}],rest:60},
@@ -120,9 +122,16 @@ let timerHandle=null;
 let workoutTimerHandle=null;
 let pendingTemplateUpdate=null;
 
+function migrateData(data){
+ if(!data||typeof data!=="object")return structuredClone(seed);
+ data.schemaVersion=SCHEMA_VERSION;
+ return data;
+}
 function load(){
- try{return JSON.parse(localStorage.getItem(KEY))||structuredClone(seed)}
- catch{return structuredClone(seed)}
+ try{
+  const stored=JSON.parse(localStorage.getItem(KEY));
+  return stored?migrateData(stored):structuredClone(seed);
+ }catch{return structuredClone(seed)}
 }
 function save(){localStorage.setItem(KEY,JSON.stringify(db))}
 function el(id){return document.getElementById(id)}
