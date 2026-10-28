@@ -321,8 +321,8 @@ function workoutView(){
  <input class="field small" inputmode="numeric" data-reps="${ei}:${si}" value="${s.reps}">
  <button class="check ${s.done?"done":""}" data-check="${ei}:${si}">${s.done?"✓":""}</button>
  </div>`).join("")}
+ ${restEnds>Date.now()&&restExerciseIndex===ei?restTimerHtml():""}
  <button class="btn ghost" data-add-set="${ei}">＋ Lägg till set</button></section>`).join("")}</div>
- ${restEnds>Date.now()?restTimerHtml():""}
  <button class="btn full" data-action="add-workout-exercise">＋ Lägg till övning</button>\n <button class="btn primary full" data-action="finish">Avsluta pass</button>
  <button class="btn ghost full" data-action="cancel">Avbryt</button>`;
 }
