@@ -554,7 +554,7 @@ function action(e){
  if(a==="empty"){activeWorkout={id:crypto.randomUUID(),templateId:null,name:"Nytt pass",type:"strength",startedAt:new Date().toISOString(),exercises:[]};render()}
  if(a==="new-template"){const id=crypto.randomUUID();db.templates.push({id,name:"Ny template",type:"strength",exercises:[]});save();modal={type:"template",id};render()}
  if(a==="new-exercise"){const name=prompt("Namn på övning");if(!name)return;const group=prompt("Muskelgrupp","Övrigt")||"Övrigt";db.exercises.push({id:"custom-"+Date.now(),name,group});save();render()}
- if(a==="add-workout-exercise"){modal={type:"exercise-picker",target:"workout"};render()}
+ if(a==="add-workout-exercise"){syncWorkoutInputs();modal={type:"exercise-picker",target:"workout"};render()}
  if(a==="add-template-ex"){modal={type:"exercise-picker",target:"template",templateId:modal.id};render()}
  if(a==="save-template"){const t=db.templates.find(x=>x.id===modal.id);t.name=el("tpl-name").value.trim()||"Template";t.type=el("tpl-type").value;if(t.type!=="strength")t.duration=Number(el("tpl-duration")?.value)||60;save();modal=null;render()}
  if(a==="delete-template"){if(confirm("Ta bort templaten?")){db.templates=db.templates.filter(x=>x.id!==modal.id);save();modal=null;render()}}
