@@ -491,16 +491,21 @@ function templateExerciseRows(t){return (t.exercises||[]).map((x,i)=>{
  </div></div>`;
 }).join("")}
 
+function syncWorkoutInputs(){
+ if(!activeWorkout)return;
+ document.querySelectorAll("[data-weight]").forEach(i=>{const[a,b]=i.dataset.weight.split(":").map(Number);if(activeWorkout.exercises[a]?.sets[b])activeWorkout.exercises[a].sets[b].weight=Number(i.value)||0});
+ document.querySelectorAll("[data-reps]").forEach(i=>{const[a,b]=i.dataset.reps.split(":").map(Number);if(activeWorkout.exercises[a]?.sets[b])activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0});
+}
 function bind(){
  document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{if(activeWorkout&&!confirm("Lämna pågående pass?"))return;activeWorkout=null;view=b.dataset.view;render()});
  document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>startTemplate(b.dataset.start));
  document.querySelectorAll("[data-edit-template]").forEach(b=>b.onclick=()=>{modal={type:"template",id:b.dataset.editTemplate};render()});
  document.querySelectorAll("[data-help-ex]").forEach(b=>b.onclick=()=>openExerciseHelp(b.dataset.helpEx));
  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{modal=null;render()});
- document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{const[ei,si]=b.dataset.check.split(":").map(Number);const s=activeWorkout.exercises[ei].sets[si];s.done=!s.done;if(s.done)startRest(activeWorkout.exercises[ei].rest);else render()});
- document.querySelectorAll("[data-add-set]").forEach(b=>b.onclick=()=>{const e=activeWorkout.exercises[+b.dataset.addSet],last=e.sets.at(-1);e.sets.push({n:e.sets.length+1,weight:last?.weight||0,reps:last?.reps||0,done:false,previous:"–"});render()});
- document.querySelectorAll("[data-weight]").forEach(i=>i.onchange=()=>{const[a,b]=i.dataset.weight.split(":").map(Number);activeWorkout.exercises[a].sets[b].weight=Number(i.value)||0});
- document.querySelectorAll("[data-reps]").forEach(i=>i.onchange=()=>{const[a,b]=i.dataset.reps.split(":").map(Number);activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0});
+ document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const[ei,si]=b.dataset.check.split(":").map(Number);const s=activeWorkout.exercises[ei].sets[si];s.done=!s.done;if(s.done)startRest(activeWorkout.exercises[ei].rest);else render()});
+ document.querySelectorAll("[data-add-set]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const e=activeWorkout.exercises[+b.dataset.addSet],last=e.sets.at(-1);e.sets.push({n:e.sets.length+1,weight:last?.weight||0,reps:last?.reps||0,done:false,previous:"–"});render()});
+ document.querySelectorAll("[data-weight]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.weight.split(":").map(Number);activeWorkout.exercises[a].sets[b].weight=Number(i.value)||0});
+ document.querySelectorAll("[data-reps]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.reps.split(":").map(Number);activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0});
  const hs=el("history-ex");if(hs)hs.onchange=()=>renderExerciseHistory(hs.value);
  const es=el("exercise-search");if(es)es.oninput=()=>el("exercise-list").innerHTML=exerciseList(es.value);
  const ps=el("picker-search");if(ps)ps.oninput=()=>{el("picker-list").innerHTML=pickerList(ps.value);bindPickerButtons()};
