@@ -501,6 +501,12 @@ function syncWorkoutInputs(){
  document.querySelectorAll("[data-weight]").forEach(i=>{const[a,b]=i.dataset.weight.split(":").map(Number);if(activeWorkout.exercises[a]?.sets[b])activeWorkout.exercises[a].sets[b].weight=Number(i.value)||0});
  document.querySelectorAll("[data-reps]").forEach(i=>{const[a,b]=i.dataset.reps.split(":").map(Number);if(activeWorkout.exercises[a]?.sets[b])activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0});
 }
+function selectOnFocus(selector){
+ document.querySelectorAll(selector).forEach(i=>{
+  i.onfocus=()=>i.select();
+  i.onclick=()=>i.select();
+ });
+}
 function bind(){
  document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{if(activeWorkout&&!confirm("Lämna pågående pass?"))return;activeWorkout=null;view=b.dataset.view;render()});
  document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>startTemplate(b.dataset.start));
@@ -511,6 +517,7 @@ function bind(){
  document.querySelectorAll("[data-add-set]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const e=activeWorkout.exercises[+b.dataset.addSet],last=e.sets.at(-1);e.sets.push({n:e.sets.length+1,weight:last?.weight||0,reps:last?.reps||0,done:false,previous:"–"});render()});
  document.querySelectorAll("[data-weight]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.weight.split(":").map(Number);activeWorkout.exercises[a].sets[b].weight=Number(i.value)||0});
  document.querySelectorAll("[data-reps]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.reps.split(":").map(Number);activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0});
+ selectOnFocus("[data-weight],[data-reps],[data-tpl-set-weight],[data-tpl-set-reps]");
  const hs=el("history-ex");if(hs)hs.onchange=()=>renderExerciseHistory(hs.value);
  const es=el("exercise-search");if(es)es.oninput=()=>el("exercise-list").innerHTML=exerciseList(es.value);
  const ps=el("picker-search");if(ps)ps.oninput=()=>{el("picker-list").innerHTML=pickerList(ps.value);bindPickerButtons()};
