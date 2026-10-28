@@ -119,7 +119,9 @@ let view="train";
 let modal=null;
 let activeWorkout=null;
 let restEnds=0;
+let restExerciseIndex=null;
 let timerHandle=null;
+let audioContext=null;
 let workoutTimerHandle=null;
 let pendingTemplateUpdate=null;
 
