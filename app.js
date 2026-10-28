@@ -338,7 +338,9 @@ function startWorkoutElapsedTimer(){
  workoutTimerHandle=setInterval(update,1000);
 }
 function restTimerHtml(){const sec=Math.max(0,Math.ceil((restEnds-Date.now())/1000));return `<div class="timer"><b>⏱ Vila</b><b id="rest-time">${Math.floor(sec/60)}:${String(sec%60).padStart(2,"0")}</b><button class="btn ghost" data-action="skip-rest">Hoppa över</button></div>`}
-function startRest(seconds){restEnds=Date.now()+seconds*1000;clearInterval(timerHandle);timerHandle=setInterval(()=>{if(restEnds<=Date.now()){clearInterval(timerHandle);restEnds=0;render()}else{const t=el("rest-time");if(t){const s=Math.ceil((restEnds-Date.now())/1000);t.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}}},1000);render()}
+function prepareAudio(){try{if(!audioContext)audioContext=new (window.AudioContext||window.webkitAudioContext)();if(audioContext.state==="suspended")audioContext.resume()}catch{}}
+function beep(){try{prepareAudio();if(!audioContext)return;const play=delay=>{const osc=audioContext.createOscillator(),gain=audioContext.createGain(),start=audioContext.currentTime+delay;osc.type="sine";osc.frequency.setValueAtTime(880,start);gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.18,start+.01);gain.gain.exponentialRampToValueAtTime(.0001,start+.12);osc.connect(gain);gain.connect(audioContext.destination);osc.start(start);osc.stop(start+.13)};play(0);play(.22)}catch{}}
+function startRest(seconds,exerciseIndex){prepareAudio();restExerciseIndex=exerciseIndex;restEnds=Date.now()+seconds*1000;clearInterval(timerHandle);timerHandle=setInterval(()=>{if(restEnds<=Date.now()){clearInterval(timerHandle);restEnds=0;restExerciseIndex=null;beep();render()}else{const t=el("rest-time");if(t){const s=Math.ceil((restEnds-Date.now())/1000);t.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}}},1000);render()}
 function workoutDiffersFromTemplate(workout){
  const t=db.templates.find(x=>x.id===workout.templateId);
  if(!t||t.type!=="strength")return false;
@@ -370,6 +372,7 @@ function finishWorkout(){
  save();
  activeWorkout=null;
  restEnds=0;
+ restExerciseIndex=null;
  pendingTemplateUpdate=finished;
  if(!finished.templateId){
   modal={type:"template-save"};
@@ -504,7 +507,7 @@ function bind(){
  document.querySelectorAll("[data-edit-template]").forEach(b=>b.onclick=()=>{modal={type:"template",id:b.dataset.editTemplate};render()});
  document.querySelectorAll("[data-help-ex]").forEach(b=>b.onclick=()=>openExerciseHelp(b.dataset.helpEx));
  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{modal=null;render()});
- document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const[ei,si]=b.dataset.check.split(":").map(Number);const s=activeWorkout.exercises[ei].sets[si];s.done=!s.done;if(s.done)startRest(activeWorkout.exercises[ei].rest);else render()});
+ document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const[ei,si]=b.dataset.check.split(":").map(Number);const s=activeWorkout.exercises[ei].sets[si];s.done=!s.done;if(s.done)startRest(activeWorkout.exercises[ei].rest,ei);else render()});
  document.querySelectorAll("[data-add-set]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const e=activeWorkout.exercises[+b.dataset.addSet],last=e.sets.at(-1);e.sets.push({n:e.sets.length+1,weight:last?.weight||0,reps:last?.reps||0,done:false,previous:"–"});render()});
  document.querySelectorAll("[data-weight]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.weight.split(":").map(Number);activeWorkout.exercises[a].sets[b].weight=Number(i.value)||0});
  document.querySelectorAll("[data-reps]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.reps.split(":").map(Number);activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0});
@@ -551,8 +554,8 @@ function action(e){
   }
   pendingTemplateUpdate=null;modal=null;render();
  }
- if(a==="cancel"){if(confirm("Avbryt passet?")){activeWorkout=null;restEnds=0;render()}}
- if(a==="skip-rest"){restEnds=0;render()}
+ if(a==="cancel"){if(confirm("Avbryt passet?")){activeWorkout=null;restEnds=0;restExerciseIndex=null;render()}}
+ if(a==="skip-rest"){restEnds=0;restExerciseIndex=null;render()}
  if(a==="empty"){activeWorkout={id:crypto.randomUUID(),templateId:null,name:"Nytt pass",type:"strength",startedAt:new Date().toISOString(),exercises:[]};render()}
  if(a==="new-template"){const id=crypto.randomUUID();db.templates.push({id,name:"Ny template",type:"strength",exercises:[]});save();modal={type:"template",id};render()}
  if(a==="new-exercise"){const name=prompt("Namn på övning");if(!name)return;const group=prompt("Muskelgrupp","Övrigt")||"Övrigt";db.exercises.push({id:"custom-"+Date.now(),name,group});save();render()}
