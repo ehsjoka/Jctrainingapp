@@ -465,17 +465,16 @@ function finishWorkout(){
  restEnds=0;
  restExerciseIndex=null;
  pendingTemplateUpdate=finished;
- let nextModal=null;
+ celebrationData=progress;
  if(!finished.templateId){
-  nextModal={type:"template-save"};
+  modal={type:"template-save",celebrateAfter:true};
  }else if(workoutDiffersFromTemplate(finished)){
-  nextModal={type:"template-update"};
+  modal={type:"template-update",celebrateAfter:true};
  }else{
   pendingTemplateUpdate=null;
+  modal={type:"celebration",progress};
+  celebrateHaptic();
  }
- celebrationData=progress;
- modal={type:"celebration",progress,nextModal};
- celebrateHaptic();
  render();
 }
 
@@ -659,16 +658,35 @@ function action(e){
  const a=e.currentTarget.dataset.action;
  if(a==="finish")finishWorkout();
  if(a==="celebration-done"){
-  const next=modal?.nextModal||null;
   celebrationData=null;
-  modal=next;
-  if(!next)pendingTemplateUpdate=null;
+  modal=null;
+  pendingTemplateUpdate=null;
   render();
  }
- if(a==="keep-template"){pendingTemplateUpdate=null;modal=null;render()}
- if(a==="update-template"){if(pendingTemplateUpdate){applyWorkoutToTemplate(pendingTemplateUpdate);save()}pendingTemplateUpdate=null;modal=null;render()}
- if(a==="discard-new-template"){pendingTemplateUpdate=null;modal=null;render()}
+ if(a==="keep-template"){
+  const showCelebration=modal?.celebrateAfter;
+  pendingTemplateUpdate=null;
+  modal=showCelebration?{type:"celebration",progress:celebrationData}:null;
+  if(showCelebration)celebrateHaptic();
+  render();
+ }
+ if(a==="update-template"){
+  const showCelebration=modal?.celebrateAfter;
+  if(pendingTemplateUpdate){applyWorkoutToTemplate(pendingTemplateUpdate);save()}
+  pendingTemplateUpdate=null;
+  modal=showCelebration?{type:"celebration",progress:celebrationData}:null;
+  if(showCelebration)celebrateHaptic();
+  render();
+ }
+ if(a==="discard-new-template"){
+  const showCelebration=modal?.celebrateAfter;
+  pendingTemplateUpdate=null;
+  modal=showCelebration?{type:"celebration",progress:celebrationData}:null;
+  if(showCelebration)celebrateHaptic();
+  render();
+ }
  if(a==="save-new-template"){
+  const showCelebration=modal?.celebrateAfter;
   if(pendingTemplateUpdate){
    const name=(el("new-template-name")?.value||"").trim()||"Nytt pass";
    const t={id:crypto.randomUUID(),name,type:"strength",exercises:pendingTemplateUpdate.exercises.map(e=>({
@@ -676,7 +694,10 @@ function action(e){
    }))};
    db.templates.push(t);save();
   }
-  pendingTemplateUpdate=null;modal=null;render();
+  pendingTemplateUpdate=null;
+  modal=showCelebration?{type:"celebration",progress:celebrationData}:null;
+  if(showCelebration)celebrateHaptic();
+  render();
  }
  if(a==="cancel"){if(confirm("Avbryt passet?")){activeWorkout=null;restEnds=0;restExerciseIndex=null;render()}}
  if(a==="skip-rest"){restEnds=0;restExerciseIndex=null;render()}
