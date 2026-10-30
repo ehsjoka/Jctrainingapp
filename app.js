@@ -338,9 +338,62 @@ function startWorkoutElapsedTimer(){
  workoutTimerHandle=setInterval(update,1000);
 }
 function restTimerHtml(){const sec=Math.max(0,Math.ceil((restEnds-Date.now())/1000));return `<div class="timer"><b>⏱ Vila</b><b id="rest-time">${Math.floor(sec/60)}:${String(sec%60).padStart(2,"0")}</b><button class="btn ghost" data-action="skip-rest">Hoppa över</button></div>`}
-function prepareAudio(){try{if(!audioContext)audioContext=new (window.AudioContext||window.webkitAudioContext)();if(audioContext.state==="suspended")audioContext.resume()}catch{}}
-function beep(){try{prepareAudio();if(!audioContext)return;const play=delay=>{const osc=audioContext.createOscillator(),gain=audioContext.createGain(),start=audioContext.currentTime+delay;osc.type="sine";osc.frequency.setValueAtTime(880,start);gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(.8,start+.01);gain.gain.setValueAtTime(.8,start+.19);gain.gain.exponentialRampToValueAtTime(.0001,start+.22);osc.connect(gain);gain.connect(audioContext.destination);osc.start(start);osc.stop(start+.23)};play(0);play(.4)}catch{}}
-function startRest(seconds,exerciseIndex){prepareAudio();restExerciseIndex=exerciseIndex;restEnds=Date.now()+seconds*1000;clearInterval(timerHandle);timerHandle=setInterval(()=>{if(restEnds<=Date.now()){clearInterval(timerHandle);restEnds=0;restExerciseIndex=null;beep();render()}else{const t=el("rest-time");if(t){const s=Math.ceil((restEnds-Date.now())/1000);t.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`}}},1000);render()}
+async function prepareAudio(){
+ try{
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtx)return false;
+  if(!audioContext)audioContext=new AudioCtx();
+  if(audioContext.state!=="running")await audioContext.resume();
+  return audioContext.state==="running";
+ }catch{return false}
+}
+async function beep(){
+ try{
+  if(!(await prepareAudio()))return;
+  const play=delay=>{
+   const osc=audioContext.createOscillator(),gain=audioContext.createGain(),start=audioContext.currentTime+delay;
+   osc.type="sine";
+   osc.frequency.setValueAtTime(880,start);
+   gain.gain.setValueAtTime(.0001,start);
+   gain.gain.exponentialRampToValueAtTime(.8,start+.01);
+   gain.gain.setValueAtTime(.8,start+.19);
+   gain.gain.exponentialRampToValueAtTime(.0001,start+.22);
+   osc.connect(gain);gain.connect(audioContext.destination);
+   osc.start(start);osc.stop(start+.23);
+  };
+  play(0);play(.4);
+ }catch{}
+}
+async function unlockAudio(){
+ if(!(await prepareAudio()))return;
+ try{
+  const osc=audioContext.createOscillator(),gain=audioContext.createGain(),now=audioContext.currentTime;
+  gain.gain.setValueAtTime(.0001,now);
+  osc.connect(gain);gain.connect(audioContext.destination);
+  osc.start(now);osc.stop(now+.01);
+ }catch{}
+}
+function startRest(seconds,exerciseIndex){
+ restExerciseIndex=exerciseIndex;
+ restEnds=Date.now()+seconds*1000;
+ clearInterval(timerHandle);
+ timerHandle=setInterval(()=>{
+  if(restEnds<=Date.now()){
+   clearInterval(timerHandle);
+   restEnds=0;
+   restExerciseIndex=null;
+   beep();
+   render();
+  }else{
+   const t=el("rest-time");
+   if(t){
+    const s=Math.ceil((restEnds-Date.now())/1000);
+    t.textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+   }
+  }
+ },1000);
+ render();
+}
 function workoutDiffersFromTemplate(workout){
  const t=db.templates.find(x=>x.id===workout.templateId);
  if(!t||t.type!=="strength")return false;
@@ -513,7 +566,7 @@ function bind(){
  document.querySelectorAll("[data-edit-template]").forEach(b=>b.onclick=()=>{modal={type:"template",id:b.dataset.editTemplate};render()});
  document.querySelectorAll("[data-help-ex]").forEach(b=>b.onclick=()=>openExerciseHelp(b.dataset.helpEx));
  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{modal=null;render()});
- document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const[ei,si]=b.dataset.check.split(":").map(Number);const s=activeWorkout.exercises[ei].sets[si];s.done=!s.done;if(s.done)startRest(activeWorkout.exercises[ei].rest,ei);else render()});
+ document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{unlockAudio();syncWorkoutInputs();const[ei,si]=b.dataset.check.split(":").map(Number);const s=activeWorkout.exercises[ei].sets[si];s.done=!s.done;if(s.done)startRest(activeWorkout.exercises[ei].rest,ei);else render()});
  document.querySelectorAll("[data-add-set]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const e=activeWorkout.exercises[+b.dataset.addSet],last=e.sets.at(-1);e.sets.push({n:e.sets.length+1,weight:last?.weight||0,reps:last?.reps||0,done:false,previous:"–"});render()});
  document.querySelectorAll("[data-weight]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.weight.split(":").map(Number);activeWorkout.exercises[a].sets[b].weight=Number(i.value)||0});
  document.querySelectorAll("[data-reps]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.reps.split(":").map(Number);activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0});
