@@ -430,13 +430,16 @@ function workoutProgress(workout){
   const previous=previousSession?.exercises?.find(e=>e.exerciseId===current.exerciseId);
   if(!previous)continue;
   comparedExercises++;
-  const currSets=(current.sets||[]).filter(s=>s.done);
-  const useCurr=currSets.length?currSets:(current.sets||[]);
-  const prevSets=(previous.sets||[]).filter(s=>s.done);
-  const usePrev=prevSets.length?prevSets:(previous.sets||[]);
+  const useCurr=(current.sets||[]).filter(s=>s.done);
+  const prevDone=(previous.sets||[]).filter(s=>s.done);
+  const usePrev=prevDone.length?prevDone:(previous.sets||[]);
+  if(!useCurr.length)continue;
   let best=null;
-  for(let i=0;i<Math.min(useCurr.length,usePrev.length);i++){
-   const c=useCurr[i],p=usePrev[i],cw=Number(c.weight)||0,pw=Number(p.weight)||0,cr=Number(c.reps)||0,pr=Number(p.reps)||0;
+  for(const c of useCurr){
+   const setIndex=Math.max(0,Number(c.n||1)-1);
+   const p=usePrev[setIndex];
+   if(!p)continue;
+   const cw=Number(c.weight)||0,pw=Number(p.weight)||0,cr=Number(c.reps)||0,pr=Number(p.reps)||0;
    if(cw>pw){
     const gain=cw-pw;
     if(!best||best.kind!=="weight"||gain>best.gain)best={kind:"weight",gain,text:`${exName(current.exerciseId)}: ${num(pw)} → ${num(cw)} kg`};
