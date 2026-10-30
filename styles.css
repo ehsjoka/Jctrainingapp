@@ -21,3 +21,45 @@
 @keyframes star-pop{0%{opacity:0;transform:translateY(12px) scale(.35) rotate(-18deg)}65%{opacity:1;transform:translateY(-3px) scale(1.18) rotate(7deg)}100%{opacity:1;transform:none}}
 @keyframes celebration-shake{0%,100%{transform:translateX(0)}18%{transform:translateX(-5px) rotate(-.4deg)}36%{transform:translateX(5px) rotate(.4deg)}54%{transform:translateX(-3px)}72%{transform:translateX(3px)}}
 @media (prefers-reduced-motion:reduce){.celebration-card,.celebration-stars span{animation:none}}
+
+
+/* Enhanced workout celebration */
+.celebration-card{position:relative;overflow:hidden;min-height:360px}
+.celebration-fx{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.celebration-card>h2,.celebration-card>p,.celebration-card>.celebration-wins,.celebration-card>button{position:relative;z-index:2}
+.celebration-fireworks,.celebration-sparks,.celebration-confetti{position:absolute;inset:0}
+.firework-star{
+ position:absolute;transform:translate(-50%,-50%) scale(.2);font-size:var(--size);line-height:1;color:var(--color);opacity:0;
+ text-shadow:0 0 7px rgba(255,255,255,.75),0 0 18px currentColor;
+ animation:firework-burst var(--duration) cubic-bezier(.12,.7,.2,1) var(--delay) forwards,firework-twinkle .72s ease-in-out var(--delay) 2
+}
+.spark-piece{
+ position:absolute;left:50%;top:43%;width:3px;height:18px;border-radius:999px;background:linear-gradient(to bottom,#fff,#ffd84d 45%,transparent);
+ transform-origin:50% 100%;opacity:0;
+ animation:spark-burst var(--duration) ease-out var(--delay) forwards
+}
+.confetti-piece{
+ position:absolute;top:-14px;width:var(--w);height:var(--h);background:var(--color);opacity:0;border-radius:2px;
+ animation:confetti-fall var(--duration) cubic-bezier(.18,.65,.25,1) var(--delay) forwards
+}
+@keyframes firework-burst{
+ 0%{opacity:0;transform:translate(-50%,-50%) translate(0,0) scale(.15) rotate(0)}
+ 12%{opacity:1}
+ 72%{opacity:1;transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(1.05) rotate(16deg)}
+ 100%{opacity:0;transform:translate(-50%,-50%) translate(calc(var(--dx)*1.08),calc(var(--dy)*1.08 + 20px)) scale(.78) rotate(28deg)}
+}
+@keyframes firework-twinkle{0%,100%{filter:brightness(1)}50%{filter:brightness(1.7)}}
+@keyframes spark-burst{
+ 0%{opacity:0;transform:translate(-50%,-50%) translate(0,0) scaleY(.3) rotate(0)}
+ 10%{opacity:1}
+ 80%{opacity:1;transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scaleY(1) rotate(18deg)}
+ 100%{opacity:0;transform:translate(-50%,-50%) translate(var(--dx),calc(var(--dy) + 18px)) scaleY(.5) rotate(26deg)}
+}
+@keyframes confetti-fall{
+ 0%{opacity:0;transform:translate3d(0,-10px,0) rotate(0)}
+ 10%{opacity:1}
+ 100%{opacity:0;transform:translate3d(var(--drift),380px,0) rotate(var(--rotate))}
+}
+@media (prefers-reduced-motion:reduce){
+ .firework-star,.spark-piece,.confetti-piece,.celebration-card{animation:none!important}
+}
