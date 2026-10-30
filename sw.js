@@ -1,5 +1,5 @@
-const CACHE = "jc-training-v109";
-const ASSETS = ["./","./index.html","./styles.css?v=109","./app.js?v=109","./manifest.webmanifest","./icon.svg"];
+const CACHE = "jc-training-v110";
+const ASSETS = ["./","./index.html","./styles.css?v=110","./app.js?v=110","./manifest.webmanifest","./icon.svg"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
