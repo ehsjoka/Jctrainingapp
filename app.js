@@ -521,6 +521,48 @@ function dataView(){
  <div class="danger-zone"><button class="btn danger full" data-action="reset">Radera all lokal data</button></div>`;
 }
 
+function celebrationFireworks(count=54){
+ const colors=["#ffd84d","#ff7a59","#7dd3fc","#c084fc","#86efac","#f9a8d4","#ffffff","#fb7185","#34d399"];
+ return Array.from({length:count},()=>{
+  const angle=Math.random()*Math.PI*2;
+  const distance=90+Math.random()*170;
+  const dx=Math.cos(angle)*distance;
+  const dy=Math.sin(angle)*distance;
+  const size=9+Math.random()*20;
+  const delay=Math.random()*.55;
+  const duration=.9+Math.random()*1.1;
+  const color=colors[Math.floor(Math.random()*colors.length)];
+  const left=50+(Math.random()*18-9);
+  const top=42+(Math.random()*12-6);
+  return `<span class="firework-star" style="--dx:${dx.toFixed(1)}px;--dy:${dy.toFixed(1)}px;--size:${size.toFixed(1)}px;--delay:${delay.toFixed(2)}s;--duration:${duration.toFixed(2)}s;--color:${color};left:${left.toFixed(1)}%;top:${top.toFixed(1)}%">★</span>`;
+ }).join("");
+}
+function celebrationConfetti(count=40){
+ const colors=["#ffd84d","#ff7a59","#7dd3fc","#c084fc","#86efac","#f9a8d4","#fb7185","#34d399"];
+ return Array.from({length:count},()=>{
+  const left=Math.random()*100;
+  const drift=-90+Math.random()*180;
+  const rotate=180+Math.random()*540;
+  const delay=Math.random()*.5;
+  const duration=1.4+Math.random()*1.2;
+  const width=5+Math.random()*6;
+  const height=9+Math.random()*10;
+  const color=colors[Math.floor(Math.random()*colors.length)];
+  return `<span class="confetti-piece" style="left:${left.toFixed(1)}%;--drift:${drift.toFixed(1)}px;--rotate:${rotate.toFixed(0)}deg;--delay:${delay.toFixed(2)}s;--duration:${duration.toFixed(2)}s;--w:${width.toFixed(1)}px;--h:${height.toFixed(1)}px;--color:${color}"></span>`;
+ }).join("");
+}
+function celebrationSparks(count=26){
+ return Array.from({length:count},()=>{
+  const angle=Math.random()*Math.PI*2;
+  const distance=70+Math.random()*120;
+  const dx=Math.cos(angle)*distance;
+  const dy=Math.sin(angle)*distance;
+  const delay=Math.random()*.38;
+  const duration=.55+Math.random()*.75;
+  return `<span class="spark-piece" style="--dx:${dx.toFixed(1)}px;--dy:${dy.toFixed(1)}px;--delay:${delay.toFixed(2)}s;--duration:${duration.toFixed(2)}s"></span>`;
+ }).join("");
+}
+
 function modalContent(){
  if(modal.type==="celebration"){
   const p=modal.progress||celebrationData||{improvements:[]};
@@ -530,7 +572,11 @@ function modalContent(){
    ?`Du förbättrade ${wins.length===1?"en sak":"flera saker"} jämfört med förra passet. ⭐`
    :"Bra genomfört — ännu ett pass i banken. 💪";
   return `<div class="modal celebration-modal"><div class="modal-inner celebration-card">
-   <div class="celebration-stars" aria-hidden="true"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+   <div class="celebration-fx" aria-hidden="true">
+    <div class="celebration-fireworks">${celebrationFireworks(54)}</div>
+    <div class="celebration-sparks">${celebrationSparks(26)}</div>
+    <div class="celebration-confetti">${celebrationConfetti(40)}</div>
+   </div>
    <h2 class="celebration-title">${headline}</h2>
    <p class="celebration-message">${message}</p>
    ${wins.length?`<div class="celebration-wins">${wins.slice(0,4).map(x=>`<div>🏆 ${esc(x)}</div>`).join("")}</div>`:""}
