@@ -124,6 +124,7 @@ let timerHandle=null;
 let audioContext=null;
 let workoutTimerHandle=null;
 let pendingTemplateUpdate=null;
+let celebrationData=null;
 
 function migrateData(data){
  if(!data||typeof data!=="object")return structuredClone(seed);
@@ -419,22 +420,62 @@ function applyWorkoutToTemplate(workout){
   setValues:e.sets.map(s=>({weight:Number(s.weight)||0,reps:Number(s.reps)||0}))
  }));
 }
+function workoutProgress(workout){
+ const improvements=[];
+ let comparedExercises=0;
+ for(const current of workout.exercises||[]){
+  const previousSession=[...db.sessions].reverse().find(s=>
+   s.id!==workout.id&&s.type==="strength"&&s.exercises?.some(e=>e.exerciseId===current.exerciseId)
+  );
+  const previous=previousSession?.exercises?.find(e=>e.exerciseId===current.exerciseId);
+  if(!previous)continue;
+  comparedExercises++;
+  const currSets=(current.sets||[]).filter(s=>s.done);
+  const useCurr=currSets.length?currSets:(current.sets||[]);
+  const prevSets=(previous.sets||[]).filter(s=>s.done);
+  const usePrev=prevSets.length?prevSets:(previous.sets||[]);
+  let best=null;
+  for(let i=0;i<Math.min(useCurr.length,usePrev.length);i++){
+   const c=useCurr[i],p=usePrev[i],cw=Number(c.weight)||0,pw=Number(p.weight)||0,cr=Number(c.reps)||0,pr=Number(p.reps)||0;
+   if(cw>pw){
+    const gain=cw-pw;
+    if(!best||best.kind!=="weight"||gain>best.gain)best={kind:"weight",gain,text:`${exName(current.exerciseId)}: ${num(pw)} → ${num(cw)} kg`};
+   }else if(cw===pw&&cr>pr){
+    const gain=cr-pr;
+    if(!best||best.kind!=="weight"&&gain>best.gain)best={kind:"reps",gain,text:`${exName(current.exerciseId)}: ${pr} → ${cr} reps`};
+   }
+  }
+  if(best)improvements.push(best.text);
+ }
+ return {improvements,comparedExercises};
+}
+function celebrateHaptic(){
+ try{
+  if(navigator.vibrate)navigator.vibrate([55,45,85]);
+ }catch{}
+}
 function finishWorkout(){
+ syncWorkoutInputs();
  activeWorkout.completedAt=new Date().toISOString();
  const finished=activeWorkout;
+ const progress=workoutProgress(finished);
  db.sessions.push(finished);
  save();
  activeWorkout=null;
  restEnds=0;
  restExerciseIndex=null;
  pendingTemplateUpdate=finished;
+ let nextModal=null;
  if(!finished.templateId){
-  modal={type:"template-save"};
+  nextModal={type:"template-save"};
  }else if(workoutDiffersFromTemplate(finished)){
-  modal={type:"template-update"};
+  nextModal={type:"template-update"};
  }else{
   pendingTemplateUpdate=null;
  }
+ celebrationData=progress;
+ modal={type:"celebration",progress,nextModal};
+ celebrateHaptic();
  render();
 }
 
@@ -479,6 +520,21 @@ function dataView(){
 }
 
 function modalContent(){
+ if(modal.type==="celebration"){
+  const p=modal.progress||celebrationData||{improvements:[]};
+  const wins=p.improvements||[];
+  const headline=wins.length?"Snyggt jobbat!":"Passet klart!";
+  const message=wins.length
+   ?`Du förbättrade ${wins.length===1?"en sak":"flera saker"} jämfört med förra passet. ⭐`
+   :"Bra genomfört — ännu ett pass i banken. 💪";
+  return `<div class="modal celebration-modal"><div class="modal-inner celebration-card">
+   <div class="celebration-stars" aria-hidden="true"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+   <h2 class="celebration-title">${headline}</h2>
+   <p class="celebration-message">${message}</p>
+   ${wins.length?`<div class="celebration-wins">${wins.slice(0,4).map(x=>`<div>🏆 ${esc(x)}</div>`).join("")}</div>`:""}
+   <button class="btn primary full" data-action="celebration-done">Klar</button>
+  </div></div>`;
+ }
  if(modal.type==="exercise-help"){
   const id=modal.exerciseId, item=helpMatchFor(id);
   if(exerciseHelpLoading)return `<div class="modal"><div class="modal-inner"><div class="modal-head"><h2>${esc(exName(id))}</h2><button class="btn ghost" data-close>Stäng</button></div><div class="card"><p>Hämtar övningshjälp…</p></div></div></div>`;
@@ -602,6 +658,13 @@ function bindPickerButtons(){
 function action(e){
  const a=e.currentTarget.dataset.action;
  if(a==="finish")finishWorkout();
+ if(a==="celebration-done"){
+  const next=modal?.nextModal||null;
+  celebrationData=null;
+  modal=next;
+  if(!next)pendingTemplateUpdate=null;
+  render();
+ }
  if(a==="keep-template"){pendingTemplateUpdate=null;modal=null;render()}
  if(a==="update-template"){if(pendingTemplateUpdate){applyWorkoutToTemplate(pendingTemplateUpdate);save()}pendingTemplateUpdate=null;modal=null;render()}
  if(a==="discard-new-template"){pendingTemplateUpdate=null;modal=null;render()}
