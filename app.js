@@ -353,15 +353,16 @@ async function beep(){
   const play=delay=>{
    const osc=audioContext.createOscillator(),gain=audioContext.createGain(),start=audioContext.currentTime+delay;
    osc.type="sine";
-   osc.frequency.setValueAtTime(880,start);
+   osc.frequency.setValueAtTime(660,start);
    gain.gain.setValueAtTime(.0001,start);
-   gain.gain.exponentialRampToValueAtTime(.8,start+.01);
-   gain.gain.setValueAtTime(.8,start+.19);
-   gain.gain.exponentialRampToValueAtTime(.0001,start+.22);
+   gain.gain.exponentialRampToValueAtTime(.55,start+.025);
+   gain.gain.setValueAtTime(.55,start+.16);
+   gain.gain.exponentialRampToValueAtTime(.0001,start+.28);
    osc.connect(gain);gain.connect(audioContext.destination);
-   osc.start(start);osc.stop(start+.23);
+   osc.start(start);osc.stop(start+.3);
   };
-  play(0);play(.4);
+  play(0);
+  play(.62);
  }catch{}
 }
 async function unlockAudio(){
