@@ -336,6 +336,7 @@ function workoutView(){
  <button class="check ${s.done?"done":""}" data-check="${ei}:${si}">${s.done?"✓":""}</button>
  </div>`).join("")}
  ${restEnds>Date.now()&&restExerciseIndex===ei?restTimerHtml():""}
+ <div class="rest-quick"><span class="hint">Vila</span>${[60,90,120].map(v=>`<button class="btn ghost rest-choice ${Number(e.rest||60)===v?"active":""}" data-rest-choice="${ei}:${v}">${v}s</button>`).join("")}</div>
  <button class="btn ghost" data-add-set="${ei}">＋ Lägg till set</button></section>`).join("")}</div>
  <button class="btn full" data-action="add-workout-exercise">＋ Lägg till övning</button>\n <button class="btn primary full" data-action="finish">Avsluta pass</button>
  <button class="btn ghost full" data-action="cancel">Avbryt</button>`;
@@ -416,6 +417,8 @@ function workoutDiffersFromTemplate(workout){
  for(let i=0;i<workout.exercises.length;i++){
   const we=workout.exercises[i],te=t.exercises[i];
   if(!te||te.exerciseId!==we.exerciseId)return true;
+  if(Number(te.rest||60)!==Number(we.rest||60))return true;
+  if(String(te.comment||"")!==String(we.comment||""))return true;
   const ts=templateSets(te);
   if(ts.length!==we.sets.length)return true;
   for(let j=0;j<we.sets.length;j++){
@@ -591,6 +594,11 @@ function celebrationSparks(count=26){
 }
 
 function modalContent(){
+ if(modal.type==="resume-workout"){
+  const d=modal.draft,w=d?.workout;
+  const when=w?.startedAt?new Date(w.startedAt).toLocaleString("sv-SE",{dateStyle:"short",timeStyle:"short"}):"tidigare";
+  return `<div class="modal"><div class="modal-inner"><div class="modal-head"><h2>Pågående pass hittat</h2></div><div class="card stack"><p style="margin:0">Du hade ett pågående pass: <b>${esc(w?.name||"Träningspass")}</b>.</p><p class="hint" style="margin:0">Startat ${esc(when)}</p><button class="btn primary full" data-action="resume-workout">Fortsätt passet</button><button class="btn full" data-action="discard-workout">Ta bort det</button></div></div></div>`;
+ }
  if(modal.type==="celebration"){
   const p=modal.progress||celebrationData||{improvements:[]};
   const wins=p.improvements||[];
