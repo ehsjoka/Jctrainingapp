@@ -454,6 +454,17 @@ function workoutProgress(workout){
  }
  return {improvements,comparedExercises};
 }
+function trainingDayStreak(throughDate){
+ const dayNumber=value=>{
+  const d=new Date(value);
+  return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000);
+ };
+ const end=dayNumber(throughDate);
+ const days=new Set((db.sessions||[]).filter(s=>s.completedAt).map(s=>dayNumber(s.completedAt)));
+ let streak=0;
+ while(days.has(end-streak))streak++;
+ return streak;
+}
 function celebrateHaptic(){
  try{
   if(navigator.vibrate)navigator.vibrate([55,45,85]);
@@ -465,6 +476,8 @@ function finishWorkout(){
  const finished=activeWorkout;
  const progress=workoutProgress(finished);
  db.sessions.push(finished);
+ const streak=trainingDayStreak(finished.completedAt);
+ if(streak>=3)progress.recoveryNote=`Du har tränat ${streak} dagar i rad — bra jobbat. Dags för en vilodag? 😴`;
  save();
  activeWorkout=null;
  restEnds=0;
@@ -582,6 +595,7 @@ function modalContent(){
    <h2 class="celebration-title">${headline}</h2>
    <p class="celebration-message">${message}</p>
    ${wins.length?`<div class="celebration-wins">${wins.slice(0,4).map(x=>`<div>🏆 ${esc(x)}</div>`).join("")}</div>`:""}
+   ${p.recoveryNote?`<div class="recovery-note">🛌 ${esc(p.recoveryNote)}</div>`:""}
    <button class="btn primary full" data-action="celebration-done">Klar</button>
   </div></div>`;
  }
