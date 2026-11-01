@@ -314,7 +314,7 @@ function workoutView(){
  return `${header(activeWorkout.name,`Pågående`)}
  <div class="workout-elapsed"><span>⏱ Pass</span><b id="workout-elapsed">${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,"0")}</b></div>
  <div class="stack">${activeWorkout.exercises.map((e,ei)=>`
- <section class="workout-card"><div class="row between"><div class="workout-ex-title"><h3>${esc(exName(e.exerciseId))}</h3>${exerciseIcon(e.exerciseId)}</div><button class="btn ghost" data-help-ex="${e.exerciseId}">ⓘ Hjälp</button></div>
+ <section class="workout-card"><div class="row between"><div class="workout-ex-title"><h3>${esc(exName(e.exerciseId))}</h3>${exerciseIcon(e.exerciseId)}</div><div class="row exercise-actions"><button class="btn ghost move-btn" data-move-workout-ex="${ei}:-1" ${ei===0?"disabled":""}>↑</button><button class="btn ghost move-btn" data-move-workout-ex="${ei}:1" ${ei===activeWorkout.exercises.length-1?"disabled":""}>↓</button><button class="btn ghost" data-help-ex="${e.exerciseId}">ⓘ Hjälp</button></div></div>
  <div class="set-grid set-head"><span>SET</span><span>FÖRRA</span><span>KG</span><span>REPS</span><span>✓</span></div>
  ${e.sets.map((s,si)=>`<div class="set-grid set-row">
  <span>${s.n}</span><span class="muted">${s.previous}</span>
@@ -640,7 +640,7 @@ function pickerList(q){
 function templateExerciseRows(t){return (t.exercises||[]).map((x,i)=>{
  const sets=templateSets(x);
  return `<div class="card" style="margin-bottom:9px">
- <div class="row between"><b>${esc(exName(x.exerciseId))}</b><button class="btn ghost" data-remove-template-ex="${i}">Ta bort</button></div>
+ <div class="row between"><b>${esc(exName(x.exerciseId))}</b><div class="row exercise-actions"><button class="btn ghost move-btn" data-move-template-ex="${i}:-1" ${i===0?"disabled":""}>↑</button><button class="btn ghost move-btn" data-move-template-ex="${i}:1" ${i===(t.exercises||[]).length-1?"disabled":""}>↓</button><button class="btn ghost" data-remove-template-ex="${i}">Ta bort</button></div></div>
  <div class="set-grid set-head" style="grid-template-columns:38px 1fr 1fr 42px;margin-top:10px"><span>SET</span><span>KG</span><span>REPS</span><span></span></div>
  ${sets.map((sv,si)=>`<div class="set-grid set-row" style="grid-template-columns:38px 1fr 1fr 42px">
    <span>${si+1}</span>
@@ -665,6 +665,12 @@ function selectOnFocus(selector){
   i.onclick=()=>i.select();
  });
 }
+function moveItem(list,from,to){
+ if(!Array.isArray(list)||from<0||to<0||from>=list.length||to>=list.length||from===to)return false;
+ const [item]=list.splice(from,1);
+ list.splice(to,0,item);
+ return true;
+}
 function bind(){
  document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{if(activeWorkout&&!confirm("Lämna pågående pass?"))return;activeWorkout=null;view=b.dataset.view;render()});
  document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>startTemplate(b.dataset.start));
@@ -673,6 +679,7 @@ function bind(){
  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{modal=null;render()});
  document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{unlockAudio();syncWorkoutInputs();const[ei,si]=b.dataset.check.split(":").map(Number);const s=activeWorkout.exercises[ei].sets[si];s.done=!s.done;if(s.done)startRest(activeWorkout.exercises[ei].rest,ei);else render()});
  document.querySelectorAll("[data-add-set]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const e=activeWorkout.exercises[+b.dataset.addSet],last=e.sets.at(-1);e.sets.push({n:e.sets.length+1,weight:last?.weight||0,reps:last?.reps||0,done:false,previous:"–"});render()});
+ document.querySelectorAll("[data-move-workout-ex]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const[from,delta]=b.dataset.moveWorkoutEx.split(":").map(Number),to=from+delta;if(moveItem(activeWorkout.exercises,from,to)){if(restExerciseIndex===from)restExerciseIndex=to;else if(restExerciseIndex===to)restExerciseIndex=from;render()}});
  document.querySelectorAll("[data-weight]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.weight.split(":").map(Number);activeWorkout.exercises[a].sets[b].weight=Number(i.value)||0});
  document.querySelectorAll("[data-reps]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.reps.split(":").map(Number);activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0});
  selectOnFocus("[data-weight],[data-reps],[data-tpl-set-weight],[data-tpl-set-reps]");
@@ -683,6 +690,7 @@ function bind(){
  const cf=el("csv-file");if(cf)cf.onchange=e=>importCSV(e.target.files[0]);
  const jf=el("json-file");if(jf)jf.onchange=e=>importJSON(e.target.files[0]);
  const tt=el("tpl-type");if(tt)tt.onchange=()=>{const t=db.templates.find(x=>x.id===modal.id);t.type=tt.value;if(t.type==="strength"&&!t.exercises)t.exercises=[];render()};
+ document.querySelectorAll("[data-move-template-ex]").forEach(b=>b.onclick=()=>{const t=db.templates.find(x=>x.id===modal.id);const[from,delta]=b.dataset.moveTemplateEx.split(":").map(Number);if(moveItem(t.exercises,from,from+delta))render()});
  document.querySelectorAll("[data-remove-template-ex]").forEach(b=>b.onclick=()=>{const t=db.templates.find(x=>x.id===modal.id);t.exercises.splice(+b.dataset.removeTemplateEx,1);render()});
  document.querySelectorAll("[data-tpl-set-weight]").forEach(inp=>inp.onchange=()=>{const[ei,si]=inp.dataset.tplSetWeight.split(":").map(Number);const x=db.templates.find(t=>t.id===modal.id).exercises[ei];x.setValues=templateSets(x);x.setValues[si].weight=Number(inp.value)||0});
  document.querySelectorAll("[data-tpl-set-reps]").forEach(inp=>inp.onchange=()=>{const[ei,si]=inp.dataset.tplSetReps.split(":").map(Number);const x=db.templates.find(t=>t.id===modal.id).exercises[ei];x.setValues=templateSets(x);x.setValues[si].reps=Number(inp.value)||0});
