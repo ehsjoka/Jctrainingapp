@@ -1,5 +1,6 @@
 const KEY="jc-training-data";
 const BACKUP_KEY="jc-training-data-auto-backup";
+const ACTIVE_WORKOUT_KEY="jc-training-active-workout";
 const SCHEMA_VERSION=1;
 const exerciseHelpAliases={
 "bench-press":"Barbell Bench Press","incline-db-press":"Incline Dumbbell Press","dumbbell-bench-press":"Dumbbell Bench Press","incline-bench-press":"Incline Bench Press","chest-press-machine":"Machine Bench Press","cable-fly":"Cable Crossover","pec-deck":"Butterfly","push-up":"Pushups",
@@ -137,6 +138,14 @@ function load(){
   return stored?migrateData(stored):structuredClone(seed);
  }catch{return structuredClone(seed)}
 }
+function saveActiveWorkout(){
+ if(!activeWorkout)return;
+ try{localStorage.setItem(ACTIVE_WORKOUT_KEY,JSON.stringify({savedAt:new Date().toISOString(),workout:activeWorkout,restEnds,restExerciseIndex}))}catch{}
+}
+function activeWorkoutDraft(){
+ try{const d=JSON.parse(localStorage.getItem(ACTIVE_WORKOUT_KEY));return d?.workout?d:null}catch{return null}
+}
+function clearActiveWorkoutDraft(){try{localStorage.removeItem(ACTIVE_WORKOUT_KEY)}catch{}}
 function save(){
  const current=localStorage.getItem(KEY);
  if(current){
@@ -206,6 +215,8 @@ function lastRunText(name){
 
 function app(){
  document.body.innerHTML='<div id="app"></div>';
+ const draft=activeWorkoutDraft();
+ if(draft)modal={type:"resume-workout",draft};
  render();
  if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js");
 }
@@ -252,6 +263,7 @@ function startTemplate(id){
  activeWorkout={id:crypto.randomUUID(),templateId:t.id,name:t.name,type:"strength",startedAt:new Date().toISOString(),exercises:(t.exercises||[]).map(te=>({
  exerciseId:te.exerciseId,rest:te.rest||60,comment:te.comment||"",sets:templateSets(te).map((sv,i)=>({n:i+1,weight:Number(sv.weight)||0,reps:Number(sv.reps)||0,done:false,previous:previousSet(te.exerciseId,i)}))
  }))};
+ saveActiveWorkout();
  render();
 }
 function previousSet(exerciseId,index){
@@ -778,7 +790,7 @@ function action(e){
  }
  if(a==="cancel"){if(confirm("Avbryt passet?")){activeWorkout=null;restEnds=0;restExerciseIndex=null;render()}}
  if(a==="skip-rest"){restEnds=0;restExerciseIndex=null;render()}
- if(a==="empty"){activeWorkout={id:crypto.randomUUID(),templateId:null,name:"Nytt pass",type:"strength",startedAt:new Date().toISOString(),exercises:[]};render()}
+ if(a==="empty"){activeWorkout={id:crypto.randomUUID(),templateId:null,name:"Nytt pass",type:"strength",startedAt:new Date().toISOString(),exercises:[]};saveActiveWorkout();render()}
  if(a==="new-template"){const id=crypto.randomUUID();db.templates.push({id,name:"Ny template",type:"strength",exercises:[]});save();modal={type:"template",id};render()}
  if(a==="new-exercise"){const name=prompt("Namn på övning");if(!name)return;const group=prompt("Muskelgrupp","Övrigt")||"Övrigt";db.exercises.push({id:"custom-"+Date.now(),name,group});save();render()}
  if(a==="add-workout-exercise"){syncWorkoutInputs();modal={type:"exercise-picker",target:"workout"};render()}
