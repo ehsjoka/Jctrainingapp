@@ -250,7 +250,7 @@ function startTemplate(id){
    save();render();return;
  }
  activeWorkout={id:crypto.randomUUID(),templateId:t.id,name:t.name,type:"strength",startedAt:new Date().toISOString(),exercises:(t.exercises||[]).map(te=>({
- exerciseId:te.exerciseId,rest:te.rest||60,sets:templateSets(te).map((sv,i)=>({n:i+1,weight:Number(sv.weight)||0,reps:Number(sv.reps)||0,done:false,previous:previousSet(te.exerciseId,i)}))
+ exerciseId:te.exerciseId,rest:te.rest||60,comment:te.comment||"",sets:templateSets(te).map((sv,i)=>({n:i+1,weight:Number(sv.weight)||0,reps:Number(sv.reps)||0,done:false,previous:previousSet(te.exerciseId,i)}))
  }))};
  render();
 }
@@ -315,6 +315,7 @@ function workoutView(){
  <div class="workout-elapsed"><span>⏱ Pass</span><b id="workout-elapsed">${Math.floor(elapsed/60)}:${String(elapsed%60).padStart(2,"0")}</b></div>
  <div class="stack">${activeWorkout.exercises.map((e,ei)=>`
  <section class="workout-card"><div class="row between"><div class="workout-ex-title"><h3>${esc(exName(e.exerciseId))}</h3>${exerciseIcon(e.exerciseId)}</div><div class="row exercise-actions"><button class="btn ghost move-btn" data-move-workout-ex="${ei}:-1" ${ei===0?"disabled":""}>↑</button><button class="btn ghost move-btn" data-move-workout-ex="${ei}:1" ${ei===activeWorkout.exercises.length-1?"disabled":""}>↓</button><button class="btn ghost" data-help-ex="${e.exerciseId}">ⓘ Hjälp</button></div></div>
+ <input class="field exercise-comment" maxlength="120" data-comment="${ei}" value="${esc(e.comment||"")}" placeholder="Kommentar till nästa pass">
  <div class="set-grid set-head"><span>SET</span><span>FÖRRA</span><span>KG</span><span>REPS</span><span>✓</span></div>
  ${e.sets.map((s,si)=>`<div class="set-grid set-row">
  <span>${s.n}</span><span class="muted">${s.previous}</span>
@@ -417,6 +418,7 @@ function applyWorkoutToTemplate(workout){
  t.exercises=workout.exercises.map(e=>({
   exerciseId:e.exerciseId,
   rest:e.rest||60,
+  comment:e.comment||"",
   setValues:e.sets.map(s=>({weight:Number(s.weight)||0,reps:Number(s.reps)||0}))
  }));
 }
@@ -641,6 +643,7 @@ function templateExerciseRows(t){return (t.exercises||[]).map((x,i)=>{
  const sets=templateSets(x);
  return `<div class="card" style="margin-bottom:9px">
  <div class="row between"><b>${esc(exName(x.exerciseId))}</b><div class="row exercise-actions"><button class="btn ghost move-btn" data-move-template-ex="${i}:-1" ${i===0?"disabled":""}>↑</button><button class="btn ghost move-btn" data-move-template-ex="${i}:1" ${i===(t.exercises||[]).length-1?"disabled":""}>↓</button><button class="btn ghost" data-remove-template-ex="${i}">Ta bort</button></div></div>
+ <input class="field exercise-comment" maxlength="120" data-tpl-comment="${i}" value="${esc(x.comment||"")}" placeholder="Kommentar till nästa pass">
  <div class="set-grid set-head" style="grid-template-columns:38px 1fr 1fr 42px;margin-top:10px"><span>SET</span><span>KG</span><span>REPS</span><span></span></div>
  ${sets.map((sv,si)=>`<div class="set-grid set-row" style="grid-template-columns:38px 1fr 1fr 42px">
    <span>${si+1}</span>
@@ -658,6 +661,7 @@ function syncWorkoutInputs(){
  if(!activeWorkout)return;
  document.querySelectorAll("[data-weight]").forEach(i=>{const[a,b]=i.dataset.weight.split(":").map(Number);if(activeWorkout.exercises[a]?.sets[b])activeWorkout.exercises[a].sets[b].weight=Number(i.value)||0});
  document.querySelectorAll("[data-reps]").forEach(i=>{const[a,b]=i.dataset.reps.split(":").map(Number);if(activeWorkout.exercises[a]?.sets[b])activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0});
+ document.querySelectorAll("[data-comment]").forEach(i=>{const a=+i.dataset.comment;if(activeWorkout.exercises[a])activeWorkout.exercises[a].comment=i.value.slice(0,120)});
 }
 function selectOnFocus(selector){
  document.querySelectorAll(selector).forEach(i=>{
@@ -682,6 +686,7 @@ function bind(){
  document.querySelectorAll("[data-move-workout-ex]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const[from,delta]=b.dataset.moveWorkoutEx.split(":").map(Number),to=from+delta;if(moveItem(activeWorkout.exercises,from,to)){if(restExerciseIndex===from)restExerciseIndex=to;else if(restExerciseIndex===to)restExerciseIndex=from;render()}});
  document.querySelectorAll("[data-weight]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.weight.split(":").map(Number);activeWorkout.exercises[a].sets[b].weight=Number(i.value)||0});
  document.querySelectorAll("[data-reps]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.reps.split(":").map(Number);activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0});
+ document.querySelectorAll("[data-comment]").forEach(i=>i.oninput=()=>{const a=+i.dataset.comment;if(activeWorkout.exercises[a])activeWorkout.exercises[a].comment=i.value.slice(0,120)});
  selectOnFocus("[data-weight],[data-reps],[data-tpl-set-weight],[data-tpl-set-reps]");
  const hs=el("history-ex");if(hs)hs.onchange=()=>renderExerciseHistory(hs.value);
  const es=el("exercise-search");if(es)es.oninput=()=>el("exercise-list").innerHTML=exerciseList(es.value);
@@ -696,6 +701,7 @@ function bind(){
  document.querySelectorAll("[data-tpl-set-reps]").forEach(inp=>inp.onchange=()=>{const[ei,si]=inp.dataset.tplSetReps.split(":").map(Number);const x=db.templates.find(t=>t.id===modal.id).exercises[ei];x.setValues=templateSets(x);x.setValues[si].reps=Number(inp.value)||0});
  document.querySelectorAll("[data-add-tpl-set]").forEach(b=>b.onclick=()=>{const x=db.templates.find(t=>t.id===modal.id).exercises[+b.dataset.addTplSet];x.setValues=templateSets(x);const last=x.setValues.at(-1)||{weight:0,reps:10};x.setValues.push({...last});render()});
  document.querySelectorAll("[data-remove-tpl-set]").forEach(b=>b.onclick=()=>{const[ei,si]=b.dataset.removeTplSet.split(":").map(Number);const x=db.templates.find(t=>t.id===modal.id).exercises[ei];x.setValues=templateSets(x);if(x.setValues.length>1)x.setValues.splice(si,1);render()});
+ document.querySelectorAll("[data-tpl-comment]").forEach(i=>i.oninput=()=>{const t=db.templates.find(x=>x.id===modal.id);if(t?.exercises[+i.dataset.tplComment])t.exercises[+i.dataset.tplComment].comment=i.value.slice(0,120)});
  document.querySelectorAll("[data-tpl-rest]").forEach(i=>i.onchange=()=>db.templates.find(x=>x.id===modal.id).exercises[+i.dataset.tplRest].rest=Number(i.value)||60);
  document.querySelectorAll("[data-action]").forEach(b=>b.onclick=action);
 }
@@ -703,10 +709,10 @@ function bindPickerButtons(){
  document.querySelectorAll("[data-pick-ex]").forEach(b=>b.onclick=()=>{
   const ex=db.exercises.find(x=>x.id===b.dataset.pickEx);if(!ex)return;
   if(modal.target==="workout"){
-   activeWorkout.exercises.push({exerciseId:ex.id,rest:60,sets:[{n:1,weight:0,reps:10,done:false,previous:previousSet(ex.id,0)},{n:2,weight:0,reps:10,done:false,previous:previousSet(ex.id,1)},{n:3,weight:0,reps:10,done:false,previous:previousSet(ex.id,2)}]});
+   activeWorkout.exercises.push({exerciseId:ex.id,rest:60,comment:"",sets:[{n:1,weight:0,reps:10,done:false,previous:previousSet(ex.id,0)},{n:2,weight:0,reps:10,done:false,previous:previousSet(ex.id,1)},{n:3,weight:0,reps:10,done:false,previous:previousSet(ex.id,2)}]});
   }else if(modal.target==="template"){
    const t=db.templates.find(x=>x.id===modal.templateId);
-   if(t)t.exercises.push({exerciseId:ex.id,setValues:[{weight:0,reps:10},{weight:0,reps:10},{weight:0,reps:10}],rest:60});
+   if(t)t.exercises.push({exerciseId:ex.id,comment:"",setValues:[{weight:0,reps:10},{weight:0,reps:10},{weight:0,reps:10}],rest:60});
   }
   modal=null;render();
  });
@@ -747,7 +753,7 @@ function action(e){
   if(pendingTemplateUpdate){
    const name=(el("new-template-name")?.value||"").trim()||"Nytt pass";
    const t={id:crypto.randomUUID(),name,type:"strength",exercises:pendingTemplateUpdate.exercises.map(e=>({
-    exerciseId:e.exerciseId,rest:e.rest||60,setValues:e.sets.map(s=>({weight:Number(s.weight)||0,reps:Number(s.reps)||0}))
+    exerciseId:e.exerciseId,rest:e.rest||60,comment:e.comment||"",setValues:e.sets.map(s=>({weight:Number(s.weight)||0,reps:Number(s.reps)||0}))
    }))};
    db.templates.push(t);save();
   }
