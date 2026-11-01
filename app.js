@@ -392,6 +392,7 @@ async function unlockAudio(){
 function startRest(seconds,exerciseIndex){
  restExerciseIndex=exerciseIndex;
  restEnds=Date.now()+seconds*1000;
+ saveActiveWorkout();
  clearInterval(timerHandle);
  timerHandle=setInterval(()=>{
   if(restEnds<=Date.now()){
@@ -491,6 +492,7 @@ function finishWorkout(){
  const finished=activeWorkout;
  const progress=workoutProgress(finished);
  db.sessions.push(finished);
+ clearActiveWorkoutDraft();
  const streak=trainingDayStreak(finished.completedAt);
  if(streak>=3)progress.recoveryNote=`Du har tränat ${streak} dagar i rad — bra jobbat. Dags för en vilodag? 😴`;
  save();
@@ -715,12 +717,13 @@ function bind(){
  document.querySelectorAll("[data-edit-template]").forEach(b=>b.onclick=()=>{modal={type:"template",id:b.dataset.editTemplate};render()});
  document.querySelectorAll("[data-help-ex]").forEach(b=>b.onclick=()=>openExerciseHelp(b.dataset.helpEx));
  document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>{modal=null;render()});
- document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{unlockAudio();syncWorkoutInputs();const[ei,si]=b.dataset.check.split(":").map(Number);const s=activeWorkout.exercises[ei].sets[si];s.done=!s.done;if(s.done)startRest(activeWorkout.exercises[ei].rest,ei);else render()});
- document.querySelectorAll("[data-add-set]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const e=activeWorkout.exercises[+b.dataset.addSet],last=e.sets.at(-1);e.sets.push({n:e.sets.length+1,weight:last?.weight||0,reps:last?.reps||0,done:false,previous:"–"});render()});
- document.querySelectorAll("[data-move-workout-ex]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const[from,delta]=b.dataset.moveWorkoutEx.split(":").map(Number),to=from+delta;if(moveItem(activeWorkout.exercises,from,to)){if(restExerciseIndex===from)restExerciseIndex=to;else if(restExerciseIndex===to)restExerciseIndex=from;render()}});
- document.querySelectorAll("[data-weight]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.weight.split(":").map(Number);activeWorkout.exercises[a].sets[b].weight=Number(i.value)||0});
- document.querySelectorAll("[data-reps]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.reps.split(":").map(Number);activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0});
- document.querySelectorAll("[data-comment]").forEach(i=>i.oninput=()=>{const a=+i.dataset.comment;if(activeWorkout.exercises[a])activeWorkout.exercises[a].comment=i.value.slice(0,120)});
+ document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{unlockAudio();syncWorkoutInputs();const[ei,si]=b.dataset.check.split(":").map(Number);const s=activeWorkout.exercises[ei].sets[si];s.done=!s.done;saveActiveWorkout();if(s.done)startRest(activeWorkout.exercises[ei].rest,ei);else render()});
+ document.querySelectorAll("[data-add-set]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const e=activeWorkout.exercises[+b.dataset.addSet],last=e.sets.at(-1);e.sets.push({n:e.sets.length+1,weight:last?.weight||0,reps:last?.reps||0,done:false,previous:"–"});saveActiveWorkout();render()});
+ document.querySelectorAll("[data-move-workout-ex]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const[from,delta]=b.dataset.moveWorkoutEx.split(":").map(Number),to=from+delta;if(moveItem(activeWorkout.exercises,from,to)){if(restExerciseIndex===from)restExerciseIndex=to;else if(restExerciseIndex===to)restExerciseIndex=from;saveActiveWorkout();render()}});
+ document.querySelectorAll("[data-weight]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.weight.split(":").map(Number);activeWorkout.exercises[a].sets[b].weight=Number(i.value)||0;saveActiveWorkout()});
+ document.querySelectorAll("[data-reps]").forEach(i=>i.oninput=()=>{const[a,b]=i.dataset.reps.split(":").map(Number);activeWorkout.exercises[a].sets[b].reps=Number(i.value)||0;saveActiveWorkout()});
+ document.querySelectorAll("[data-comment]").forEach(i=>i.oninput=()=>{const a=+i.dataset.comment;if(activeWorkout.exercises[a])activeWorkout.exercises[a].comment=i.value.slice(0,120);saveActiveWorkout()});
+ document.querySelectorAll("[data-rest-choice]").forEach(b=>b.onclick=()=>{syncWorkoutInputs();const[ei,seconds]=b.dataset.restChoice.split(":").map(Number);if(activeWorkout.exercises[ei]){activeWorkout.exercises[ei].rest=seconds;saveActiveWorkout();render()}});
  selectOnFocus("[data-weight],[data-reps],[data-tpl-set-weight],[data-tpl-set-reps]");
  const hs=el("history-ex");if(hs)hs.onchange=()=>renderExerciseHistory(hs.value);
  const es=el("exercise-search");if(es)es.oninput=()=>el("exercise-list").innerHTML=exerciseList(es.value);
@@ -748,11 +751,14 @@ function bindPickerButtons(){
    const t=db.templates.find(x=>x.id===modal.templateId);
    if(t)t.exercises.push({exerciseId:ex.id,comment:"",setValues:[{weight:0,reps:10},{weight:0,reps:10},{weight:0,reps:10}],rest:60});
   }
+  if(activeWorkout)saveActiveWorkout();
   modal=null;render();
  });
 }
 function action(e){
  const a=e.currentTarget.dataset.action;
+ if(a==="resume-workout"){const d=modal?.draft||activeWorkoutDraft();if(d?.workout){activeWorkout=d.workout;restEnds=Number(d.restEnds)||0;restExerciseIndex=Number.isInteger(d.restExerciseIndex)?d.restExerciseIndex:null;modal=null;if(restEnds>Date.now()&&restExerciseIndex!==null)startRest(Math.max(1,Math.ceil((restEnds-Date.now())/1000)),restExerciseIndex);else{restEnds=0;restExerciseIndex=null;saveActiveWorkout();render()}}}
+ if(a==="discard-workout"){clearActiveWorkoutDraft();modal=null;render()}
  if(a==="finish")finishWorkout();
  if(a==="celebration-done"){
   celebrationData=null;
@@ -796,8 +802,8 @@ function action(e){
   if(showCelebration)celebrateHaptic();
   render();
  }
- if(a==="cancel"){if(confirm("Avbryt passet?")){activeWorkout=null;restEnds=0;restExerciseIndex=null;render()}}
- if(a==="skip-rest"){restEnds=0;restExerciseIndex=null;render()}
+ if(a==="cancel"){if(confirm("Avbryt passet?")){activeWorkout=null;restEnds=0;restExerciseIndex=null;clearActiveWorkoutDraft();render()}}
+ if(a==="skip-rest"){restEnds=0;restExerciseIndex=null;saveActiveWorkout();render()}
  if(a==="empty"){activeWorkout={id:crypto.randomUUID(),templateId:null,name:"Nytt pass",type:"strength",startedAt:new Date().toISOString(),exercises:[]};saveActiveWorkout();render()}
  if(a==="new-template"){const id=crypto.randomUUID();db.templates.push({id,name:"Ny template",type:"strength",exercises:[]});save();modal={type:"template",id};render()}
  if(a==="new-exercise"){const name=prompt("Namn på övning");if(!name)return;const group=prompt("Muskelgrupp","Övrigt")||"Övrigt";db.exercises.push({id:"custom-"+Date.now(),name,group});save();render()}
