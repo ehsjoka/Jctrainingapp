@@ -63,3 +63,5 @@
 @media (prefers-reduced-motion:reduce){
  .firework-star,.spark-piece,.confetti-piece,.celebration-card{animation:none!important}
 }
+
+.exercise-actions{gap:2px}.move-btn{padding:6px 7px;font-size:18px;line-height:1}.move-btn:disabled{opacity:.25}
