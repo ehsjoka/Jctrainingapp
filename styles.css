@@ -69,3 +69,5 @@
 .exercise-comment{margin:8px 0 10px;padding:8px 10px;font-size:13px}
 
 .recovery-note{margin:14px 0;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.06);color:#d8e0eb;line-height:1.4}
+
+.rest-quick{display:flex;align-items:center;gap:6px;margin:10px 0}.rest-choice{padding:6px 10px;min-width:52px}.rest-choice.active{font-weight:700;outline:2px solid currentColor}
