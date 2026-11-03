@@ -117,6 +117,7 @@ sessions:[]
 
 let db=load();
 let view="train";
+let historyMonthOffset=0;
 let modal=null;
 let activeWorkout=null;
 let restEnds=0;
@@ -515,14 +516,18 @@ function finishWorkout(){
 
 function historyView(){
  const sessions=[...db.sessions].reverse();
- const d=new Date(),y=d.getFullYear(),m=d.getMonth(),first=new Date(y,m,1),last=new Date(y,m+1,0);
+ const now=new Date();
+ const d=new Date(now.getFullYear(),now.getMonth()+historyMonthOffset,1);
+ const y=d.getFullYear(),m=d.getMonth(),first=new Date(y,m,1),last=new Date(y,m+1,0);
  let cells=Array(first.getDay()===0?6:first.getDay()-1).fill("");
  for(let day=1;day<=last.getDate();day++){
   const types=sessions.filter(s=>{const x=new Date(s.completedAt);return x.getFullYear()===y&&x.getMonth()===m&&x.getDate()===day}).map(s=>s.type);
   const type=types[0],cls=type?typeClass(type):"";
   cells.push(`<div class="day ${type?"mark ":""}${cls}">${day}</div>`);
  }
- return `${header("Historik",new Date().toLocaleDateString("sv-SE",{month:"long",year:"numeric"}))}
+ const monthLabel=d.toLocaleDateString("sv-SE",{month:"long",year:"numeric"});
+ return `${header("Historik",monthLabel)}
+ <div class="history-month-nav"><button class="btn ghost" data-history-month="-1">‹</button><b>${esc(monthLabel)}</b><button class="btn ghost" data-history-month="1">›</button></div>
  <div class="card"><div class="calendar">${["M","T","O","T","F","L","S"].map(x=>`<div class="muted" style="text-align:center;font-size:11px">${x}</div>`).join("")}${cells.map(x=>x||'<div></div>').join("")}</div></div>
  <div class="section-title"><h2>Senaste pass</h2></div>
  <div class="card list">${sessions.length?sessions.slice(0,20).map(s=>`<div class="list-item row between"><div><b>${esc(s.name)}</b><div class="muted">${fmtDate(s.completedAt)}</div></div><span class="pill">${s.type}</span></div>`).join(""):'<span class="muted">Ingen historik ännu.</span>'}</div>
@@ -713,6 +718,7 @@ function moveItem(list,from,to){
 }
 function bind(){
  document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{if(activeWorkout&&!confirm("Lämna pågående pass?"))return;activeWorkout=null;view=b.dataset.view;render()});
+ document.querySelectorAll("[data-history-month]").forEach(b=>b.onclick=()=>{historyMonthOffset+=Number(b.dataset.historyMonth)||0;render()});
  document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>startTemplate(b.dataset.start));
  document.querySelectorAll("[data-edit-template]").forEach(b=>b.onclick=()=>{modal={type:"template",id:b.dataset.editTemplate};render()});
  document.querySelectorAll("[data-help-ex]").forEach(b=>b.onclick=()=>openExerciseHelp(b.dataset.helpEx));
