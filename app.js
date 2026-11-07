@@ -514,9 +514,22 @@ function finishWorkout(){
  render();
 }
 
+function rollingWorkoutAverage(weeks=4,throughDate=new Date()){
+ const end=new Date(throughDate.getFullYear(),throughDate.getMonth(),throughDate.getDate(),23,59,59,999);
+ const start=new Date(end);
+ start.setDate(start.getDate()-(weeks*7-1));
+ start.setHours(0,0,0,0);
+ const count=(db.sessions||[]).filter(s=>{
+  if(!s.completedAt)return false;
+  const d=new Date(s.completedAt);
+  return d>=start&&d<=end;
+ }).length;
+ return {count,weeks,average:count/weeks,start,end};
+}
 function historyView(){
  const sessions=[...db.sessions].reverse();
  const now=new Date();
+ const rolling=rollingWorkoutAverage(4,now);
  const d=new Date(now.getFullYear(),now.getMonth()+historyMonthOffset,1);
  const y=d.getFullYear(),m=d.getMonth(),first=new Date(y,m,1),last=new Date(y,m+1,0);
  let cells=Array(first.getDay()===0?6:first.getDay()-1).fill("");
@@ -527,6 +540,7 @@ function historyView(){
  }
  const monthLabel=d.toLocaleDateString("sv-SE",{month:"long",year:"numeric"});
  return `${header("Historik",monthLabel)}
+ <div class="card rolling-average"><div><div class="muted">Rullande snitt · 4 veckor</div><b>${rolling.average.toFixed(1).replace(".",",")} pass/vecka</b></div><div class="rolling-average-meta">${rolling.count} pass · senaste 28 dagarna</div></div>
  <div class="history-month-nav"><button class="btn ghost" data-history-month="-1">‹</button><b>${esc(monthLabel)}</b><button class="btn ghost" data-history-month="1">›</button></div>
  <div class="card"><div class="calendar">${["M","T","O","T","F","L","S"].map(x=>`<div class="muted" style="text-align:center;font-size:11px">${x}</div>`).join("")}${cells.map(x=>x||'<div></div>').join("")}</div></div>
  <div class="section-title"><h2>Senaste pass</h2></div>
