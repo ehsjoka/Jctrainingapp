@@ -73,3 +73,5 @@
 .rest-quick{display:flex;align-items:center;gap:6px;margin:10px 0}.rest-choice{padding:6px 10px;min-width:52px}.rest-choice.active{font-weight:700;outline:2px solid currentColor}
 
 .history-month-nav{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;margin:0 0 10px}.history-month-nav b{text-align:center;text-transform:capitalize}
+
+.rolling-average{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.rolling-average b{display:block;font-size:22px;margin-top:2px}.rolling-average-meta{text-align:right;font-size:12px;color:var(--muted,#93a1b2)}
