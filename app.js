@@ -107,6 +107,10 @@ templates:[
 {exerciseId:"dumbbell-shrug",setValues:[{weight:40,reps:12},{weight:40,reps:12},{weight:40,reps:12}],rest:60},
 {exerciseId:"lat-pulldown",setValues:[{weight:80,reps:8},{weight:80,reps:8},{weight:90,reps:3},{weight:70,reps:5}],rest:60},
 {exerciseId:"cable-triceps-extension",setValues:[{weight:28,reps:9},{weight:28,reps:9},{weight:28,reps:8},{weight:17,reps:8}],rest:60}]},
+{id:crypto.randomUUID(),name:"Armhävningar – täthet",type:"strength",exercises:[
+{exerciseId:"push-up",setValues:[{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12},{weight:0,reps:12}],rest:60,comment:"8×12. Öka enligt planen när alla set känns stabila."}]},
+{id:crypto.randomUUID(),name:"Armhävningar – volym",type:"strength",exercises:[
+{exerciseId:"push-up",setValues:[{weight:0,reps:20},{weight:0,reps:20},{weight:0,reps:20},{weight:0,reps:20},{weight:0,reps:20}],rest:90,comment:"5×20. Öka först när alla set klaras med bra teknik."}]},
 {id:crypto.randomUUID(),name:"Spinning med hög cardio",type:"cardio",duration:45},
 {id:crypto.randomUUID(),name:"Låg cardio",type:"cardio",duration:60},
 {id:crypto.randomUUID(),name:"Padel",type:"padel",duration:90}
@@ -131,6 +135,22 @@ let celebrationData=null;
 function migrateData(data){
  if(!data||typeof data!=="object")return structuredClone(seed);
  data.schemaVersion=SCHEMA_VERSION;
+ data.templates=Array.isArray(data.templates)?data.templates:[];
+ const ensureTemplate=(name,template)=>{
+  if(!data.templates.some(t=>t.name===name))data.templates.push(template);
+ };
+ ensureTemplate("Armhävningar – täthet",{
+  id:crypto.randomUUID(),name:"Armhävningar – täthet",type:"strength",exercises:[{
+   exerciseId:"push-up",rest:60,comment:"8×12. Öka enligt planen när alla set känns stabila.",
+   setValues:Array.from({length:8},()=>({weight:0,reps:12}))
+  }]
+ });
+ ensureTemplate("Armhävningar – volym",{
+  id:crypto.randomUUID(),name:"Armhävningar – volym",type:"strength",exercises:[{
+   exerciseId:"push-up",rest:90,comment:"5×20. Öka först när alla set klaras med bra teknik.",
+   setValues:Array.from({length:5},()=>({weight:0,reps:20}))
+  }]
+ });
  return data;
 }
 function load(){
