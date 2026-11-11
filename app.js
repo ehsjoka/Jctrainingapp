@@ -539,8 +539,9 @@ function rollingWorkoutAverage(weeks=4,throughDate=new Date()){
  const start=new Date(end);
  start.setDate(start.getDate()-(weeks*7-1));
  start.setHours(0,0,0,0);
+ const excludedNames=new Set(["Armhävningar – täthet","Armhävningar – volym"]);
  const count=(db.sessions||[]).filter(s=>{
-  if(!s.completedAt)return false;
+  if(!s.completedAt||excludedNames.has(s.name))return false;
   const d=new Date(s.completedAt);
   return d>=start&&d<=end;
  }).length;
