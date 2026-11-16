@@ -222,6 +222,10 @@ async function openExerciseHelp(id){
 function helpImageUrl(path){return "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/"+path}
 function fmtDate(v){return new Date(v).toLocaleDateString("sv-SE",{day:"numeric",month:"short"})}
 function typeClass(t){return t==="padel"?"type-padel":t==="cardio"?"type-cardio":"type-strength"}
+function lastRunTime(name){
+ const s=[...db.sessions].reverse().find(x=>x.name===name&&x.completedAt);
+ return s?new Date(s.completedAt).getTime():0;
+}
 function lastRunText(name){
  const s=[...db.sessions].reverse().find(x=>x.name===name&&x.completedAt);
  if(!s)return "Aldrig";
@@ -261,10 +265,11 @@ function header(title,sub=""){return `<div class="topbar"><div><div class="eyebr
 
 function trainView(){
  if(activeWorkout)return workoutView();
+ const templates=[...db.templates].map((t,i)=>({t,i,last:lastRunTime(t.name)})).sort((a,b)=>b.last-a.last||a.i-b.i).map(x=>x.t);
  return `${header("JC Training","Starta träning")}
  <button class="btn primary full" data-action="empty">＋ Starta tomt pass</button>
  <div class="section-title"><h2>Mina templates</h2><button class="btn ghost" data-action="new-template">＋ Ny</button></div>
- <div class="grid">${db.templates.map(t=>`
+ <div class="grid">${templates.map(t=>`
  <article class="card template">
    <div><span class="pill">${t.type==="strength"?(t.exercises?.length||0)+" övningar":(t.duration||0)+" min"}</span>
    <h3 style="margin-top:9px">${esc(t.name)}</h3><div class="muted" style="font-size:13px;margin-top:4px">Senast: ${lastRunText(t.name)}</div></div>
