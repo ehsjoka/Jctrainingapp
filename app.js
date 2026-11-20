@@ -85,7 +85,6 @@ templates:[
 {exerciseId:"calf-press-leg-press",setValues:[{weight:100,reps:10},{weight:130,reps:10},{weight:130,reps:10}],rest:60},
 {exerciseId:"preacher-curl",setValues:[{weight:24.5,reps:14},{weight:27,reps:12},{weight:30,reps:10}],rest:60},
 {exerciseId:"incline-db-press",setValues:[{weight:27.5,reps:8},{weight:27.5,reps:8},{weight:27.5,reps:6}],rest:60},
-{exerciseId:"leg-curl",setValues:[{weight:23,reps:10},{weight:23,reps:10},{weight:23,reps:8}],rest:60},
 {exerciseId:"dumbbell-biceps-curl",setValues:[{weight:15,reps:10},{weight:15,reps:10},{weight:15,reps:8},{weight:12.5,reps:5}],rest:60}]},
 {id:crypto.randomUUID(),name:"Axlar, mage och ben",type:"strength",exercises:[
 {exerciseId:"overhead-press",setValues:[{weight:40,reps:8},{weight:42.5,reps:6},{weight:45,reps:4},{weight:40,reps:3}],rest:60},
@@ -96,7 +95,8 @@ templates:[
 {exerciseId:"lateral-raise",setValues:[{weight:10,reps:12},{weight:10,reps:13},{weight:10,reps:12}],rest:60},
 {exerciseId:"face-pull",setValues:[{weight:28,reps:12},{weight:28,reps:12},{weight:28,reps:12}],rest:60},
 {exerciseId:"cable-crunch",setValues:[{weight:60,reps:11},{weight:68,reps:10},{weight:68,reps:10}],rest:60},
-{exerciseId:"leg-extension",setValues:[{weight:45,reps:8},{weight:45,reps:9},{weight:45,reps:9}],rest:60}]},
+{exerciseId:"leg-extension",setValues:[{weight:45,reps:8},{weight:45,reps:9},{weight:45,reps:9}],rest:60},
+{exerciseId:"leg-curl",setValues:[{weight:23,reps:10},{weight:23,reps:10},{weight:23,reps:8}],rest:60}]},
 {id:crypto.randomUUID(),name:"Rygg, triceps och lätt ben",type:"strength",exercises:[
 {exerciseId:"rdl",setValues:[{weight:50,reps:12},{weight:60,reps:10},{weight:60,reps:10}],rest:60},
 {exerciseId:"barbell-row",setValues:[{weight:50,reps:12},{weight:60,reps:8},{weight:60,reps:8}],rest:60},
@@ -151,6 +151,30 @@ function migrateData(data){
    setValues:Array.from({length:5},()=>({weight:0,reps:20}))
   }]
  });
+ const chestTemplate=data.templates.find(t=>t.name==="Bröst, biceps och ben");
+ const shoulderTemplate=data.templates.find(t=>t.name==="Axlar, mage och ben");
+ if(chestTemplate&&shoulderTemplate&&Array.isArray(chestTemplate.exercises)&&Array.isArray(shoulderTemplate.exercises)){
+  const moveIndex=chestTemplate.exercises.findIndex(e=>
+   e.exerciseId==="leg-curl" &&
+   Array.isArray(e.setValues) &&
+   e.setValues.length===3 &&
+   Number(e.setValues[0]?.weight)===23 &&
+   Number(e.setValues[1]?.weight)===23 &&
+   Number(e.setValues[2]?.weight)===23
+  );
+  const alreadyMoved=shoulderTemplate.exercises.some(e=>
+   e.exerciseId==="leg-curl" &&
+   Array.isArray(e.setValues) &&
+   e.setValues.length===3 &&
+   Number(e.setValues[0]?.weight)===23 &&
+   Number(e.setValues[1]?.weight)===23 &&
+   Number(e.setValues[2]?.weight)===23
+  );
+  if(moveIndex>=0&&!alreadyMoved){
+   const [moved]=chestTemplate.exercises.splice(moveIndex,1);
+   shoulderTemplate.exercises.push(moved);
+  }
+ }
  return data;
 }
 function load(){
